@@ -1,6 +1,7 @@
 \documentclass[11pt, a4paper]{article}
 
 \usepackage[left=2cm,text={17cm, 24cm},top=3cm]{geometry}
+\usepackage[bottom]{footmisc}
 \usepackage{times}
 \usepackage[czech]{babel}
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
@@ -27,17 +28,17 @@
 
 \section{Úvod}
 
-% TODO pociatocna otazka
-Cílém této studie je analyzovat sledování příspěvků na sociálních sítích.
+Cílém této studie je analyzovat sledování příspěvků na sociálních sítích a efektivita reklam na nich.
 Různé skupiny lidí mají různé preference a zájmy, a proto se může stát,
 že některé příspěvky nebudou dostatečně sledovány. Cílem je zjistit,
-jakým způsobem se šíří informace a jakým způsobem se může zvýšit sledovanost příspěvků.
+jakým způsobem se šíří informace a jakým způsobem se může zvýšit sledovanost reklam. 
+Poznatky o šíření příspěvků mohou být využity pro zlepšení marketingových strategií.
 
-Poznatky o šíření příspěvků mohou být využity pro zlepšení marketingových strategií,
-ale také pro zlepšení algoritmů sociálních sítí, které rozhodují o tom, které příspěvky budou uživatelům zobrazovány.
-% TODO comu cheme dospiet
-Chtěli bychom zjistit jaké příspěvky jsou relevantí pro různé věkové skupiny.
-Co chceme sledovat:
+
+Chtěli bychom sledovat, jak často sdílet a opakovat konkrétntí reklamu vzhledem rychlosti přibývajícíh, nových příspěvků na sociální síti
+(poměr mezi reklamou a ostatními příspěvky), délkou příspěvků, časem zveřejnění a délkou doby pozornosti uživatelů.
+
+\subsection{Co chceme sledovat:}
 \begin{itemize}
     \item Kolik lidí dokouká příspěvek do konce
     \begin{itemize}
@@ -49,10 +50,10 @@ Co chceme sledovat:
         \item V případě že uživatel nedokouká až do konce, pak nás zajímá, kolik procent příspěvku dokouká.
         \item Nejdůležitější informace by měly být na začátku příspěvku, aby je vidělo co nejvíce uživatelů.
     \end{itemize}
-    \item Kolikrát uživatel vidí ten stejný příspěvek
+    \item Kolikrát uživatel vidí reklamu
     \begin{itemize}
-        \item Pokud uživatel vidí daný příspěvek málokrát a jedná se o reklamu, pak na ni nemusí reagovat.
-        \item Přílišené opakování příspěvku však může vést k opačenému efektu, tedy k opětovanému ignorování příspěvku.
+        \item Pokud uživatel vidí danou reklamu málokrát, pak na ni nemusí reagovat.
+        \item Přílišené opakování reklamy však může taktéž vést k negativní reakci.
     \end{itemize}
     \item Čas zveřejnění příspěvku 
     \begin{itemize}
@@ -63,6 +64,7 @@ Co chceme sledovat:
 % TODO k comu sme dospeli
 % ako sme vysledky overovali
 
+\newpage
 \section{Fakta}
 
 \subsection{Čas zveřejnění}
@@ -85,26 +87,51 @@ Navíc, pouze 44\% uživatelů dle \cite{SocialMediaAds-44} vidí nerelevantí r
 
 Je proto dlůežité, si dát pozor, jak často se budou příspěvky opakovat, aby nebyly otravné, ale zároveň aby byly dostatečně viděny.
 
-
-
-% čas zveřejění - kdy je nelepší zveřejnit příspěvek - čas a den
-% attention span - jaké věkové kategorie lidí mají jakou dobu pozornosti
-% jaká je pravděpodobnost že uživatel sdíli - engagement rate (share, like,...) 
-% TODO aspon dva zdroje
-
 \subsection{Hypotézy}
 \begin{enumerate}
-    \item Délka příspěvku ovlivňuje sledovanost
-    \item Čas zveřejnění příspěvku ovlivňuje sledovanost
-    \item To, kolikrát uživatel vidí příspěvek, ovlivňuje reakci na něj
-    \item Věková kategorie ovlivňuje sledovanost příspěvku
+    \item Když uživatel tráví na sociální síti více času, je pravděpodobnější, že uvidí reklamu vícekrát a tedy by se měla snížit frekvence opakování, aby nedošlo k negativní reakci.
+    \item Pokud majíí uživatelé nižší dobu pozornosti, pak by se měla snížit frekvence opakování, aby nedošlo k přílišnému shlédnutí reklamy.
+    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měla zvýšit frekvence opakování rekalmy.
+    \item Frekvence opakování reklamy závisí na rychlosti přibývání nových příspěvků.na sociální síti, čím rychleji přibývají, tím více by se měla reklama sdílet.
 \end{enumerate}
 
+\newpage
 \section{Koncepce, způsob řešení}
+Na ověření hypotéz jsme se rozhodli využít systém hromadné obsuhy, kde uživatel je linkou, která zpracovává příspěvky a reklamy (procesy).
+Pro zakreslení konceptuiálního modelu jsme se rozhodli pro využití Petriho sítě. Simulační model jsme se rozdholdi na programovat v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
+\subsection{Konceptuální model}
+Uživatel je obslužnou linkou, která zpracovává příchozí příspěvky a reklamy. Ty přicházejí do systému, kde se dostávají na zásobník,
+to znamená že novější příspěvky mají priotiu a může se stát že k některým příspěvkům uživatel ani nedojde.
+Pokud příspěvěk trvá déle, jako je doba pozornosti uživatele, pak jej uživatel nedokouká do konce a příspěvek opouští systém.
+Pokud jej ale dokouká dokonce, tak stále záleží na jeho relevanci, zda uživatele zaujal a na něj uživatel reaguje, v ten moment příspěvek opouští systém jako relevantní nebo ne.
+Dále je také v případě reklamy sledováno, kolkrát ji uživatel za den viděl.
+Pokud to bylo příliškrát, pak se o tom vytváří záznam.
 
+Uživatel má také svou dobu, kdy je online, nejaktivnější je mezi 9:00 - 12:00, jinak je méně aktivní, nebo není aktivní vůbec, například když spí.
+Jeho aktiviu ovlivňuje běžné denní aktivity, jako je práce, škola, nebo volný čas. Když je člověk aktivnější, pak na sociální síti tráví delší dobu a přestávky jsou kratší.
+Pokud je uživatel méně aktivní je jeho doba na sociální stíti kratší a přestávky jsou delší. Pokud uživatel spí, pak je offline a neodebírá žádně příspěvky.
+
+Pro zjednodušení zanedbáváme různé dny v týdnu, kdy se může chování uživatele lišit. Taktéž, když se naplní počítalo reklam za den, tak jej resetujeme,
+což znamená že uživatel může vidět reklamu znovu další den.
+%V našem modelu existuje pouze jeden zásobník pro příspěvky, který je sdílený.
+Máme sdílený zásobík pro příspěvky a reklamy, tyto jednotlivé procesy si v sobě nesou informaci o svém typu, který ovlivňuje chování systému.
+
+\subsubsection{Proměnné paramtery modelu}
+Náš model obsahuje různé proměnilvé paramtery, které se budou pro jednotlivé experimenty měnit pro ověření hypotéz.
+Na základě nastavené frekvence generování nových příspěvků, doby příspěvku a doby pozornosti se budeme snažit najít optimální frekvenci pro generování reklam.
+\begin{itemize}
+    \item Frekvence generování nových příspěvků
+    \item Frekvence generování reklam
+    \item Doba příspěvku
+    \item Doba pozornosti
+\end{itemize}
+
+\subsubsection{Petriho síť}
 \vspace{1em}
 \includegraphics[width=\linewidth]{petri-net.png}
 \vspace{1em}
+
+\subsection{Simulační model}
 
 \section{Testování, experimenty}
 
