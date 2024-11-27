@@ -208,9 +208,8 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   Print(" - lengthOfAddHigh: %f\n", lengthOfAddHigh);
   Print(" - autoregulate: %d\n", autoregulate);
  
-  
-  Init(0,24*60*60*30);
-  tstat.Clear(0.0);
+  Init(0,28*24*60*60);
+  User.Clear();
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
   (new AddFatigue6Digester)->Activate(24*60*60/6);
@@ -242,7 +241,14 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
 }
 
 int main() {
+  printf("Test1\n");
   makeTest("tests/Test1.out", 10, 1000, 40, 5, 30, 10, 30, true);
+  printf("Test2\n");
   makeTest("tests/Test2.out", 10, 1000, 40, 5, 30, 10, 30, false);
+
+  printf("TestSmallAttentionSpan1\n");
+  makeTest("tests/TestSmallAttentionSpan1.out", 10, 1000, 10, 5, 30, 10, 30, true);
+  printf("TestSmallAttentionSpan2\n");
+  makeTest("tests/TestSmallAttentionSpan2.out", 10, 1000, 10, 5, 30, 10, 30, false);
 }
 
