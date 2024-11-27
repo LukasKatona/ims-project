@@ -19,8 +19,12 @@ bool autoregulate = true;
 
 // Global objects
 Facility  User("User");
-Histogram PostTable("Table of time posts spent in system",5,1,25);
-Histogram AddTable("Table of time adds spent in system",10,1,20);
+Histogram PostTable("Length of Posts",5,1,25);
+Histogram AddTable("Length of Adds",10,1,20);
+
+Stat PostsPerDay("Posts per day");
+Stat AddsPerDay("Adds per day");
+
 
 // Variables
 int postCount = 0;
@@ -139,7 +143,7 @@ class AddGenerator : public Event {
   }
 };
 
-// periiodicaly decrease fatigue
+// periodicaly decrease fatigue
 class AddFatigue6Digester : public Event {
   void Behavior() {
     if (addCount6 > 0) {
@@ -149,7 +153,7 @@ class AddFatigue6Digester : public Event {
   }
 };
 
-// periiodicaly decrease fatigue
+// periodicaly decrease fatigue
 class AddFatigue11Digester : public Event {
   void Behavior() {
     if (addCount11 > 0) {
@@ -158,6 +162,18 @@ class AddFatigue11Digester : public Event {
     AddFatigue11Digester::Activate(Time+(24*60*60/11));
   }
 };
+
+//make statistics about day
+class DayStatistics : public Event {
+  void Behavior() {
+    PostsPerDay(postCount);
+    AddsPerDay(addCount);
+    postCount = 0;
+    addCount = 0;
+    DayStatistics::Activate(Time+(24*60*60));
+  }
+};
+
 
 string parseTime(int time) {
   int day = time / (24*60*60);
@@ -212,10 +228,14 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   (new AddGenerator)->Activate();
   (new AddFatigue6Digester)->Activate(24*60*60/6);
   (new AddFatigue11Digester)->Activate(24*60*60/11);
+  (new DayStatistics)->Activate(24*60*60);
   Run();
 
+  
   PostTable.Output();
   AddTable.Output();
+  PostsPerDay.Output();
+  AddsPerDay.Output();
 
   Print("Post saw: %d\n", postCount);
   Print("Relevant posts: %d\n", numberOfRelevantPosts);
@@ -239,11 +259,13 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
 }
 
 int main() {
-  // check if tests folder exists
   if (system("test -d tests") != 0) {
-    system("mkdir tests");
+    if (system("mkdir tests")) {
+      printf("Error creating tests folder\n");
+      return 1;
+    }
   }
-  
+
   printf("test\n");
   makeTest("tests/test.out", 10, 1000, 40, 5, 30, 10, 30, false);
   printf("test-autoregulate\n");
