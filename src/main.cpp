@@ -17,19 +17,24 @@ double lengthOfAddHigh = 30;
 
 bool autoregulate = true;
 
+int numberOfDaysToSimulate = 28;
+
 // Global objects
 Facility  User("User");
+
 Histogram PostTable("Length of Posts",5,1,25);
 Histogram AddTable("Length of Adds",10,1,20);
 
-Histogram PostsPerDay("Posts per day", 0,1,28);
-Histogram AddsPerDay("Adds per day", 0,1,28);
+Histogram PostsPerDay("Posts per day", 0,1,numberOfDaysToSimulate);
+Histogram AddsPerDay("Adds per day", 0,1,numberOfDaysToSimulate);
 
-Histogram PostsPerHour("Posts per hour", 0,1,28*24);
-Histogram AddsPerHour("Adds per hour", 0,1,28*24);
+Histogram PostsPerHour("Posts per hour", 0,1,numberOfDaysToSimulate*24);
+Histogram AddsPerHour("Adds per hour", 0,1,numberOfDaysToSimulate*24);
 
-Histogram MoreThan5AddsPerDay("More than 5 adds per day", 0,1,28);
-Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0,1,28);
+Histogram MoreThan5AddsPerDay("More than 5 adds per day", 0,1,numberOfDaysToSimulate);
+Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0,1,numberOfDaysToSimulate);
+
+Stat addArrivalTimeStat("Add arrival time");
 
 // Variables
 int postCount = 0;
@@ -63,7 +68,6 @@ int getDayFromTime(int time) {
   return day;
 }
 
-// getHourFromTime but dont modulo it by day, so hour 28 is fin
 int getHourFromTime(int time) {
   int hour = time / (60*60);
   return hour;
@@ -120,20 +124,24 @@ class Add : public Process {
     addCount6++;
     addCount11++;
 
-    if (addCount6 > 5) {
-      addCount6 = 0;
+    if (addCount6 == 4) {
       if (autoregulate) {
         addArrivalTime = addArrivalTime * 1.2;
+        addArrivalTimeStat(addArrivalTime);
       }
+    } else if (addCount6 > 5) {
+      addCount6 = 0;
       addFatigue6Vector.push_back(Time);
       MoreThan5AddsPerDay(getDayFromTime(Time));
     }
 
-    if (addCount11 > 10) {
-      addCount11 = 0;
+    if (addCount11 == 9) {
       if (autoregulate) {
         addArrivalTime = addArrivalTime * 1.2;
+        addArrivalTimeStat(addArrivalTime);
       }
+    } else if (addCount11 > 10) {
+      addCount11 = 0;
       addFatigue11Vector.push_back(Time);
       MoreThan10AddsPerDay(getDayFromTime(Time));
     }
@@ -196,14 +204,28 @@ class AddFatigue11Digester : public Event {
 //make statistics about day
 class DayStatistics : public Event {
   void Behavior() {
-    DayStatistics::Activate(Time+(24*60*60));
+    if (autoregulate) {
+      addArrivalTime = addArrivalTime * 0.99;
+      addArrivalTimeStat(addArrivalTime);
+    }
+    DayStatistics::Activate(Time+(24*60*60*2));
   }
 };
 
 
 
 
-void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, double attentionSpan, double lengthOfPostLow, double lengthOfPostHigh, double lengthOfAddLow, double lengthOfAddHigh, bool autoregulate) {
+void makeTest(
+  string testOutput,
+  double postArrivalTime,
+  double addArrivalTime,
+  double attentionSpan,
+  double lengthOfPostLow,
+  double lengthOfPostHigh,
+  double lengthOfAddLow,
+  double lengthOfAddHigh,
+  bool autoregulate,
+  int numberOfDaysToSimulate = 28) {
   
   // set inputs
   ::postArrivalTime = postArrivalTime;
@@ -214,6 +236,7 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   ::lengthOfAddLow = lengthOfAddLow;
   ::lengthOfAddHigh = lengthOfAddHigh;
   ::autoregulate = autoregulate;
+  addArrivalTimeStat(addArrivalTime);
 
   // set output
   SetOutput(testOutput.c_str());
@@ -231,7 +254,7 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   Print(" - autoregulate: %d\n", autoregulate);
  
   // run simulation
-  Init(0,28*24*60*60);
+  Init(0,numberOfDaysToSimulate*24*60*60);
   User.Clear();
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
@@ -241,7 +264,7 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   Run();
 
   // print statistics
-  Print("Post saw: %d\n", postCount);
+  Print("\nPost saw: %d\n", postCount);
   Print("Relevant posts: %d\n", numberOfRelevantPosts);
   Print("Irrelevant posts: %d\n", numberOfIrrelevantPosts);
   Print("Skipped posts: %d\n", numberOfSkippedPosts);
@@ -252,8 +275,7 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   Print("Skipped adds: %d\n", numberOfSkippedAdds);
 
   Print("\nUser saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
-
-  Print("\nUser saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
+  Print("User saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
 
   PostTable.Output();
   AddTable.Output();
@@ -263,6 +285,7 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   AddsPerHour.Output();
   MoreThan5AddsPerDay.Output();
   MoreThan10AddsPerDay.Output();
+  addArrivalTimeStat.Output();
 
   // clear statistics
   postCount = 0;
@@ -286,6 +309,7 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   AddsPerHour.Clear();
   MoreThan5AddsPerDay.Clear();
   MoreThan10AddsPerDay.Clear();
+  addArrivalTimeStat.Clear();
 }
 
 int main() {
@@ -305,5 +329,8 @@ int main() {
   makeTest("tests/test-small-attention-span.out", 10, 1000, 10, 5, 30, 10, 30, false);
   printf("test-small-attention-span-autoregulate\n");
   makeTest("tests/test-small-attention-span-autoregulate.out", 10, 1000, 10, 5, 30, 10, 30, true);
+
+  printf("test-longer-simulation-time-autoregulate\n");
+  makeTest("tests/test-longer-simulation-time-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true, 28*5);
 }
 
