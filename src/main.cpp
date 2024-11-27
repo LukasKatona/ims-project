@@ -19,6 +19,7 @@ bool autoregulate = true;
 
 
 // Global objects
+TStat tstat = TStat(0.0);
 Facility  User("User");
 Histogram PostTable("Table of time posts spent in system",5,1,25);
 Histogram AddTable("Table of time adds spent in system",10,1,20);
@@ -168,40 +169,80 @@ string parseTime(int time) {
   return to_string(day) + "d " + to_string(hours) + "h " + to_string(minutes) + "m " + to_string(seconds) + "s";
 }
 
-int main() {
-  SetOutput("main.out");
+void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, double attentionSpan, double lengthOfPostLow, double lengthOfPostHigh, double lengthOfAddLow, double lengthOfAddHigh, bool autoregulate) {
+  
+  // set inputs
+  ::postArrivalTime = postArrivalTime;
+  ::addArrivalTime = addArrivalTime;
+  ::attentionSpan = attentionSpan;
+  ::lengthOfPostLow = lengthOfPostLow;
+  ::lengthOfPostHigh = lengthOfPostHigh;
+  ::lengthOfAddLow = lengthOfAddLow;
+  ::lengthOfAddHigh = lengthOfAddHigh;
+  ::autoregulate = autoregulate;
+
+  // clear variables
+  postCount = 0;
+  addCount = 0;
+  addCount6 = 0;
+  addFatigue6Vector = vector<int>();
+  addCount11 = 0;
+  addFatigue11Vector = vector<int>();
+  numberOfRelevantPosts = 0;
+  numberOfRelevantAdds = 0;
+  numberOfIrrelevantPosts = 0;
+  numberOfIrrelevantAdds = 0;
+  numberOfSkippedPosts = 0;
+  numberOfSkippedAdds = 0;
+
+  SetOutput(testOutput.c_str());
+
   Print(" Model simulating user activity on social media, keeping track of how many adds user sees in comparison to posts.\n");
+  Print(" Model inputs:\n");
+  Print(" - postArrivalTime: %f\n", postArrivalTime);
+  Print(" - addArrivalTime: %f\n", addArrivalTime);
+  Print(" - attentionSpan: %f\n", attentionSpan);
+  Print(" - lengthOfPostLow: %f\n", lengthOfPostLow);
+  Print(" - lengthOfPostHigh: %f\n", lengthOfPostHigh);
+  Print(" - lengthOfAddLow: %f\n", lengthOfAddLow);
+  Print(" - lengthOfAddHigh: %f\n", lengthOfAddHigh);
+  Print(" - autoregulate: %d\n", autoregulate);
+ 
+  
   Init(0,24*60*60*30);
+  tstat.Clear(0.0);
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
   (new AddFatigue6Digester)->Activate(24*60*60/6);
   (new AddFatigue11Digester)->Activate(24*60*60/11);
   Run();
 
-  User.Output();
   PostTable.Output();
   AddTable.Output();
-  SIMLIB_statistics.Output();
 
   Print("Post saw: %d\n", postCount);
   Print("Relevant posts: %d\n", numberOfRelevantPosts);
   Print("Irrelevant posts: %d\n", numberOfIrrelevantPosts);
   Print("Skipped posts: %d\n", numberOfSkippedPosts);
 
-
-  Print("Adds saw: %d\n", addCount);
+  Print("\nAdds saw: %d\n", addCount);
   Print("Relevant adds: %d\n", numberOfRelevantAdds);
   Print("Irrelevant adds: %d\n", numberOfIrrelevantAdds);
   Print("Skipped adds: %d\n", numberOfSkippedAdds);
 
-  Print("User saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
+  Print("\nUser saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
   for (int i = 0; i < addFatigue6Vector.size(); i++) {
     Print("Time: %s\n", parseTime(addFatigue6Vector[i]).c_str());
   }
 
-  Print("User saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
+  Print("\nUser saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
   for (int i = 0; i < addFatigue11Vector.size(); i++) {
     Print("Time: %s\n", parseTime(addFatigue11Vector[i]).c_str());
   }
+}
+
+int main() {
+  makeTest("tests/Test1.out", 10, 1000, 40, 5, 30, 10, 30, true);
+  makeTest("tests/Test2.out", 10, 1000, 40, 5, 30, 10, 30, false);
 }
 
