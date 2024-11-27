@@ -22,9 +22,14 @@ Facility  User("User");
 Histogram PostTable("Length of Posts",5,1,25);
 Histogram AddTable("Length of Adds",10,1,20);
 
-Stat PostsPerDay("Posts per day");
-Stat AddsPerDay("Adds per day");
+Histogram PostsPerDay("Posts per day", 0,1,28);
+Histogram AddsPerDay("Adds per day", 0,1,28);
 
+Histogram PostsPerHour("Posts per hour", 0,1,28*24);
+Histogram AddsPerHour("Adds per hour", 0,1,28*24);
+
+Histogram MoreThan5AddsPerDay("More than 5 adds per day", 0,1,28);
+Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0,1,28);
 
 // Variables
 int postCount = 0;
@@ -44,6 +49,25 @@ int numberOfIrrelevantAdds = 0;
 
 int numberOfSkippedPosts = 0;
 int numberOfSkippedAdds = 0;
+
+string parseTime(int time) {
+  int day = time / (24*60*60);
+  int hours = (time % (24*60*60)) / 3600;
+  int minutes = (time % 3600) / 60;
+  int seconds = time % 60;
+  return to_string(day) + "d " + to_string(hours) + "h " + to_string(minutes) + "m " + to_string(seconds) + "s";
+}
+
+int getDayFromTime(int time) {
+  int day = time / (24*60*60);
+  return day;
+}
+
+// getHourFromTime but dont modulo it by day, so hour 28 is fin
+int getHourFromTime(int time) {
+  int hour = time / (60*60);
+  return hour;
+}
 
 class Post : public Process {
   public:
@@ -75,6 +99,8 @@ class Post : public Process {
        
     Release(User);
     PostTable(Time-ArrivalTime);
+    PostsPerDay(getDayFromTime(Time));
+    PostsPerHour(getHourFromTime(Time));
   }
 };
 
@@ -100,6 +126,7 @@ class Add : public Process {
         addArrivalTime = addArrivalTime * 1.2;
       }
       addFatigue6Vector.push_back(Time);
+      MoreThan5AddsPerDay(getDayFromTime(Time));
     }
 
     if (addCount11 > 10) {
@@ -108,6 +135,7 @@ class Add : public Process {
         addArrivalTime = addArrivalTime * 1.2;
       }
       addFatigue11Vector.push_back(Time);
+      MoreThan10AddsPerDay(getDayFromTime(Time));
     }
 
     double currentAttentionSpan = Exponential(attentionSpan);
@@ -126,6 +154,8 @@ class Add : public Process {
     
     Release(User);
     AddTable(Time-ArrivalTime);
+    AddsPerDay(getDayFromTime(Time));
+    AddsPerHour(getHourFromTime(Time));
   }
 };
 
@@ -166,22 +196,12 @@ class AddFatigue11Digester : public Event {
 //make statistics about day
 class DayStatistics : public Event {
   void Behavior() {
-    PostsPerDay(postCount);
-    AddsPerDay(addCount);
-    postCount = 0;
-    addCount = 0;
     DayStatistics::Activate(Time+(24*60*60));
   }
 };
 
 
-string parseTime(int time) {
-  int day = time / (24*60*60);
-  int hours = (time % (24*60*60)) / 3600;
-  int minutes = (time % 3600) / 60;
-  int seconds = time % 60;
-  return to_string(day) + "d " + to_string(hours) + "h " + to_string(minutes) + "m " + to_string(seconds) + "s";
-}
+
 
 void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, double attentionSpan, double lengthOfPostLow, double lengthOfPostHigh, double lengthOfAddLow, double lengthOfAddHigh, bool autoregulate) {
   
@@ -195,7 +215,56 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   ::lengthOfAddHigh = lengthOfAddHigh;
   ::autoregulate = autoregulate;
 
-  // clear variables
+  // set output
+  SetOutput(testOutput.c_str());
+
+  // print model description
+  Print(" Model simulating user activity on social media, keeping track of how many adds user sees in comparison to posts.\n");
+  Print(" Model inputs:\n");
+  Print(" - postArrivalTime: %f\n", postArrivalTime);
+  Print(" - addArrivalTime: %f\n", addArrivalTime);
+  Print(" - attentionSpan: %f\n", attentionSpan);
+  Print(" - lengthOfPostLow: %f\n", lengthOfPostLow);
+  Print(" - lengthOfPostHigh: %f\n", lengthOfPostHigh);
+  Print(" - lengthOfAddLow: %f\n", lengthOfAddLow);
+  Print(" - lengthOfAddHigh: %f\n", lengthOfAddHigh);
+  Print(" - autoregulate: %d\n", autoregulate);
+ 
+  // run simulation
+  Init(0,28*24*60*60);
+  User.Clear();
+  (new PostGenerator)->Activate();
+  (new AddGenerator)->Activate();
+  (new AddFatigue6Digester)->Activate(24*60*60/6);
+  (new AddFatigue11Digester)->Activate(24*60*60/11);
+  (new DayStatistics)->Activate(24*60*60);
+  Run();
+
+  // print statistics
+  Print("Post saw: %d\n", postCount);
+  Print("Relevant posts: %d\n", numberOfRelevantPosts);
+  Print("Irrelevant posts: %d\n", numberOfIrrelevantPosts);
+  Print("Skipped posts: %d\n", numberOfSkippedPosts);
+
+  Print("\nAdds saw: %d\n", addCount);
+  Print("Relevant adds: %d\n", numberOfRelevantAdds);
+  Print("Irrelevant adds: %d\n", numberOfIrrelevantAdds);
+  Print("Skipped adds: %d\n", numberOfSkippedAdds);
+
+  Print("\nUser saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
+
+  Print("\nUser saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
+
+  PostTable.Output();
+  AddTable.Output();
+  PostsPerDay.Output();
+  PostsPerHour.Output();
+  AddsPerDay.Output();
+  AddsPerHour.Output();
+  MoreThan5AddsPerDay.Output();
+  MoreThan10AddsPerDay.Output();
+
+  // clear statistics
   postCount = 0;
   addCount = 0;
   addCount6 = 0;
@@ -209,53 +278,14 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
   numberOfSkippedPosts = 0;
   numberOfSkippedAdds = 0;
 
-  SetOutput(testOutput.c_str());
-
-  Print(" Model simulating user activity on social media, keeping track of how many adds user sees in comparison to posts.\n");
-  Print(" Model inputs:\n");
-  Print(" - postArrivalTime: %f\n", postArrivalTime);
-  Print(" - addArrivalTime: %f\n", addArrivalTime);
-  Print(" - attentionSpan: %f\n", attentionSpan);
-  Print(" - lengthOfPostLow: %f\n", lengthOfPostLow);
-  Print(" - lengthOfPostHigh: %f\n", lengthOfPostHigh);
-  Print(" - lengthOfAddLow: %f\n", lengthOfAddLow);
-  Print(" - lengthOfAddHigh: %f\n", lengthOfAddHigh);
-  Print(" - autoregulate: %d\n", autoregulate);
- 
-  Init(0,28*24*60*60);
-  User.Clear();
-  (new PostGenerator)->Activate();
-  (new AddGenerator)->Activate();
-  (new AddFatigue6Digester)->Activate(24*60*60/6);
-  (new AddFatigue11Digester)->Activate(24*60*60/11);
-  (new DayStatistics)->Activate(24*60*60);
-  Run();
-
-  
-  PostTable.Output();
-  AddTable.Output();
-  PostsPerDay.Output();
-  AddsPerDay.Output();
-
-  Print("Post saw: %d\n", postCount);
-  Print("Relevant posts: %d\n", numberOfRelevantPosts);
-  Print("Irrelevant posts: %d\n", numberOfIrrelevantPosts);
-  Print("Skipped posts: %d\n", numberOfSkippedPosts);
-
-  Print("\nAdds saw: %d\n", addCount);
-  Print("Relevant adds: %d\n", numberOfRelevantAdds);
-  Print("Irrelevant adds: %d\n", numberOfIrrelevantAdds);
-  Print("Skipped adds: %d\n", numberOfSkippedAdds);
-
-  Print("\nUser saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
-  for (int i = 0; i < addFatigue6Vector.size(); i++) {
-    Print("Time: %s\n", parseTime(addFatigue6Vector[i]).c_str());
-  }
-
-  Print("\nUser saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
-  for (int i = 0; i < addFatigue11Vector.size(); i++) {
-    Print("Time: %s\n", parseTime(addFatigue11Vector[i]).c_str());
-  }
+  PostTable.Clear();
+  AddTable.Clear();
+  PostsPerDay.Clear();
+  PostsPerHour.Clear();
+  AddsPerDay.Clear();
+  AddsPerHour.Clear();
+  MoreThan5AddsPerDay.Clear();
+  MoreThan10AddsPerDay.Clear();
 }
 
 int main() {
