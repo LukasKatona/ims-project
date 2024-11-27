@@ -1,29 +1,52 @@
 #include "simlib.h"
 #include <string.h>
+#include <vector>
+
+using namespace std;
 
 // Model inputs
 double postArrivalTime = 10;
-double addArrivalTime = 100;
+double addArrivalTime = 1000;
 double attentionSpan = 40;
-double lengthOfPost = 20;
+
+double lengthOfPostLow = 5;
+double lengthOfPostHigh = 30;
+
+double lengthOfAddLow = 10;
+double lengthOfAddHigh = 30;
 
 
 // Global objects
 Facility  User("User");
-Histogram PostTable("Table of time posts spent in system",0,25,20);
-Histogram AddTable("Table of time adds spent in system",0,25,20);
+Histogram PostTable("Table of time posts spent in system",5,1,25);
+Histogram AddTable("Table of time adds spent in system",10,1,20);
 
 // Variables
 int postCount = 0;
-
 int addCount = 0;
+
 int addCount6 = 0;
-int addFatigue6 = 0;
+vector<int> addFatigue6Vector;
 
 int addCount11 = 0;
-int addFatigue11 = 0;
+vector<int> addFatigue11Vector;
+
+int numberOfRelevantPosts = 0;
+int numberOfRelevantAdds = 0;
+
+int numberOfIrrelevantPosts = 0;
+int numberOfIrrelevantAdds = 0;
+
+int numberOfSkippedPosts = 0;
+int numberOfSkippedAdds = 0;
 
 class Post : public Process {
+  public:
+    Post(int lengthOfPost) : Process() {
+      this->lengthOfPost = lengthOfPost;
+    }
+    int lengthOfPost;
+
   double ArrivalTime;
   void Behavior() {
     Seize(User);
@@ -31,15 +54,32 @@ class Post : public Process {
     
     postCount++;
 
-    // TODO add logic 
-    Wait(40);   
-    
+    double currentAttentionSpan = Exponential(attentionSpan);
+    if (currentAttentionSpan < lengthOfPost) {
+      Wait(currentAttentionSpan);
+      numberOfSkippedPosts++;
+    } else {
+      Wait(lengthOfPost);
+      double probabilityOfGoodPost = Uniform(0,1);
+      if (probabilityOfGoodPost > 0.44) {
+        numberOfRelevantPosts++;
+      } else {
+        numberOfIrrelevantPosts++;
+      }
+    }
+       
     Release(User);
     PostTable(Time-ArrivalTime);
   }
 };
 
 class Add : public Process {
+  public:
+    Add(int lengthOfAdd) : Process() {
+      this->lengthOfAdd = lengthOfAdd;
+    }
+    int lengthOfAdd;
+
   double ArrivalTime;
   void Behavior() {
     Seize(User);
@@ -51,18 +91,27 @@ class Add : public Process {
 
     if (addCount6 > 5) {
       addCount6 = 0;
-      addFatigue6++;
+      addFatigue6Vector.push_back(Time);
     }
 
     if (addCount11 > 10) {
       addCount11 = 0;
-      addFatigue11++;
+      addFatigue11Vector.push_back(Time);
     }
 
-    Print("Add seeing\n");
-
-    // TODO add logic 
-    Wait(20);   
+    double currentAttentionSpan = Exponential(attentionSpan);
+    if (currentAttentionSpan < lengthOfAdd) {
+      Wait(currentAttentionSpan);
+      numberOfSkippedAdds++;
+    } else {
+      Wait(lengthOfAdd);
+      double probabilityOfGoodAdd = Uniform(0,1);
+      if (probabilityOfGoodAdd > 0.44) {
+        numberOfRelevantAdds++;
+      } else {
+        numberOfIrrelevantAdds++;
+      }
+    }
     
     Release(User);
     AddTable(Time-ArrivalTime);
@@ -71,14 +120,14 @@ class Add : public Process {
 
 class PostGenerator : public Event {
   void Behavior() {
-    (new Post)->Activate();
+    (new Post(Uniform(lengthOfPostLow, lengthOfPostHigh)))->Activate();
     Activate(Time+Exponential(postArrivalTime));
   }
 };
 
 class AddGenerator : public Event {
   void Behavior() {
-    (new Add)->Activate();
+    (new Add(Uniform(lengthOfAddLow, lengthOfAddHigh)))->Activate();
     Activate(Time+Exponential(addArrivalTime));
   }
 };
@@ -88,7 +137,6 @@ class AddFatigue6Digester : public Event {
   void Behavior() {
     if (addCount6 > 0) {
       addCount6--;
-      Print("Decrease fatigue 6\n");
     }
     AddFatigue6Digester::Activate(Time+(24*60*60/6));
   }
@@ -99,11 +147,17 @@ class AddFatigue11Digester : public Event {
   void Behavior() {
     if (addCount11 > 0) {
       addCount11--;
-      Print("Decrease fatigue 11\n");   
     }
     AddFatigue11Digester::Activate(Time+(24*60*60/11));
   }
 };
+
+string parseTime(int time) {
+  int hours = time / 3600;
+  int minutes = (time % 3600) / 60;
+  int seconds = time % 60;
+  return to_string(hours) + ":" + to_string(minutes) + ":" + to_string(seconds);
+}
 
 int main() {
   SetOutput("main.out");
@@ -114,14 +168,31 @@ int main() {
   (new AddFatigue6Digester)->Activate(24*60*60/6);
   (new AddFatigue11Digester)->Activate(24*60*60/11);
   Run();
+
   User.Output();
   PostTable.Output();
   AddTable.Output();
   SIMLIB_statistics.Output();
 
   Print("Post saw: %d\n", postCount);
-  Print("Add user saw: %d\n", addCount);
-  Print("Fatigue 6: %d\n", addFatigue6);
-  Print("Fatigue 11: %d\n", addFatigue11);
+  Print("Relevant posts: %d\n", numberOfRelevantPosts);
+  Print("Irrelevant posts: %d\n", numberOfIrrelevantPosts);
+  Print("Skipped posts: %d\n", numberOfSkippedPosts);
+
+
+  Print("Adds saw: %d\n", addCount);
+  Print("Relevant adds: %d\n", numberOfRelevantAdds);
+  Print("Irrelevant adds: %d\n", numberOfIrrelevantAdds);
+  Print("Skipped adds: %d\n", numberOfSkippedAdds);
+
+  Print("User saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
+  for (int i = 0; i < addFatigue6Vector.size(); i++) {
+    Print("Time: %s\n", parseTime(addFatigue6Vector[i]).c_str());
+  }
+
+  Print("User saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
+  for (int i = 0; i < addFatigue11Vector.size(); i++) {
+    Print("Time: %s\n", parseTime(addFatigue11Vector[i]).c_str());
+  }
 }
 
