@@ -241,14 +241,14 @@ void makeTest(string testOutput, double postArrivalTime, double addArrivalTime, 
 }
 
 int main() {
-  printf("Test1\n");
-  makeTest("tests/Test1.out", 10, 1000, 40, 5, 30, 10, 30, true);
-  printf("Test2\n");
-  makeTest("tests/Test2.out", 10, 1000, 40, 5, 30, 10, 30, false);
+  printf("test\n");
+  makeTest("tests/test.out", 10, 1000, 40, 5, 30, 10, 30, true);
+  printf("test-autoregulate\n");
+  makeTest("tests/test-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, false);
 
-  printf("TestSmallAttentionSpan1\n");
-  makeTest("tests/TestSmallAttentionSpan1.out", 10, 1000, 10, 5, 30, 10, 30, true);
-  printf("TestSmallAttentionSpan2\n");
-  makeTest("tests/TestSmallAttentionSpan2.out", 10, 1000, 10, 5, 30, 10, 30, false);
+  printf("test-small-attention-span\n");
+  makeTest("tests/test-small-attention-span.out", 10, 1000, 10, 5, 30, 10, 30, true);
+  printf("test-small-attention-span-autoregulate\n");
+  makeTest("tests/test-small-attention-span-autoregulate.out", 10, 1000, 10, 5, 30, 10, 30, false);
 }
 
