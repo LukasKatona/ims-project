@@ -10,3 +10,6 @@
 *.synctex.gz
 
 *.drawio.bkp
+
+*.exe
+*.o
