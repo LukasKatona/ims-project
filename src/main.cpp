@@ -19,7 +19,6 @@ bool autoregulate = true;
 
 
 // Global objects
-TStat tstat = TStat(0.0);
 Facility  User("User");
 Histogram PostTable("Table of time posts spent in system",5,1,25);
 Histogram AddTable("Table of time adds spent in system",10,1,20);
