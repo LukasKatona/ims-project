@@ -13,3 +13,7 @@
 
 *.exe
 *.o
+
+simlib/
+*.dat
+ims-proj
