@@ -15,6 +15,8 @@ double lengthOfPostHigh = 30;
 double lengthOfAddLow = 10;
 double lengthOfAddHigh = 30;
 
+bool autoregulate = true;
+
 
 // Global objects
 Facility  User("User");
@@ -91,11 +93,17 @@ class Add : public Process {
 
     if (addCount6 > 5) {
       addCount6 = 0;
+      if (autoregulate) {
+        addArrivalTime = addArrivalTime * 1.2;
+      }
       addFatigue6Vector.push_back(Time);
     }
 
     if (addCount11 > 10) {
       addCount11 = 0;
+      if (autoregulate) {
+        addArrivalTime = addArrivalTime * 1.2;
+      }
       addFatigue11Vector.push_back(Time);
     }
 
@@ -153,16 +161,17 @@ class AddFatigue11Digester : public Event {
 };
 
 string parseTime(int time) {
-  int hours = time / 3600;
+  int day = time / (24*60*60);
+  int hours = (time % (24*60*60)) / 3600;
   int minutes = (time % 3600) / 60;
   int seconds = time % 60;
-  return to_string(hours) + ":" + to_string(minutes) + ":" + to_string(seconds);
+  return to_string(day) + "d " + to_string(hours) + "h " + to_string(minutes) + "m " + to_string(seconds) + "s";
 }
 
 int main() {
   SetOutput("main.out");
   Print(" Model simulating user activity on social media, keeping track of how many adds user sees in comparison to posts.\n");
-  Init(0,24*60*60);
+  Init(0,24*60*60*30);
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
   (new AddFatigue6Digester)->Activate(24*60*60/6);
