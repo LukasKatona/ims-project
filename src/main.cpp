@@ -26,8 +26,8 @@ int addFatigue11 = 0;
 class Post : public Process {
   double ArrivalTime;
   void Behavior() {
-    ArrivalTime = Time;
-    Seize(User);    
+    Seize(User);
+    ArrivalTime = Time;    
     
     postCount++;
 
@@ -42,8 +42,8 @@ class Post : public Process {
 class Add : public Process {
   double ArrivalTime;
   void Behavior() {
-    ArrivalTime = Time;
-    Seize(User);    
+    Seize(User);
+    ArrivalTime = Time;    
     
     addCount++;
     addCount6++;
@@ -89,8 +89,8 @@ class AddFatigue6Digester : public Event {
     if (addCount6 > 0) {
       addCount6--;
       Print("Decrease fatigue 6\n");
-      AddFatigue6Digester::Activate(Time+(24*60*60/6));
     }
+    AddFatigue6Digester::Activate(Time+(24*60*60/6));
   }
 };
 
@@ -99,9 +99,9 @@ class AddFatigue11Digester : public Event {
   void Behavior() {
     if (addCount11 > 0) {
       addCount11--;
-      Print("Decrease fatigue 11\n");
-      AddFatigue11Digester::Activate(Time+(24*60*60/11));
+      Print("Decrease fatigue 11\n");   
     }
+    AddFatigue11Digester::Activate(Time+(24*60*60/11));
   }
 };
 
@@ -114,10 +114,10 @@ int main() {
   (new AddFatigue6Digester)->Activate(24*60*60/6);
   (new AddFatigue11Digester)->Activate(24*60*60/11);
   Run();
-  // User.Output();
-  // PostTable.Output();
-  // AddTable.Output();
-  // SIMLIB_statistics.Output();
+  User.Output();
+  PostTable.Output();
+  AddTable.Output();
+  SIMLIB_statistics.Output();
 
   Print("Post saw: %d\n", postCount);
   Print("Add user saw: %d\n", addCount);
