@@ -13,7 +13,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET) $(TARGET).exe
+	rm -f $(OBJS) $(TARGET) $(TARGET).exe *.dat *.out
 
 run: all
 	./$(TARGET)
