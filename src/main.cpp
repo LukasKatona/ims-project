@@ -4,6 +4,8 @@
 
 using namespace std;
 
+bool debugPrints = false;
+
 // Model inputs
 double postArrivalTime = 10;
 double addArrivalTime = 1000;
@@ -278,17 +280,17 @@ class UserActivityManager : public Process
           Wait(Uniform(10 * 60, 15 * 60)); // 10-15 minutes of productive activity
         }
         if(isSleeping) {
-          Print("User is sleeping\n");
+          if(debugPrints) Print("User is sleeping\n");
           isProductive = true;
         }
         else {
-          Print("User is productive\n");
+          if(debugPrints) Print("User is productive\n");
           isProductive = false;
         }
       }
       else
       {
-        Print("User is scrolling\n");
+        if(debugPrints) Print("User is scrolling\n");
         if (isLessActive)
         {
           Wait(Uniform(5 * 60, 8 * 60)); // 5-8 minutes of scrolling time
@@ -343,8 +345,8 @@ class DayPhaseManager : public Process
     while (true)
     {
       // Morning Phase
-      Print((parseTime(Time) + "\n").c_str());
-      Print("Starting Morning Phase\n");
+      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
+      if(debugPrints) Print("Starting Morning Phase\n");
       isProductive = false;
       (new MorningPhase)->Activate(); 
       isLessActive = true;
@@ -352,8 +354,8 @@ class DayPhaseManager : public Process
       isLessActive = false;
 
       // Midday Phase
-      Print((parseTime(Time) + "\n").c_str());
-      Print("Starting Midday Phase\n");
+      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
+      if(debugPrints) Print("Starting Midday Phase\n");
       isProductive = false;
       (new MiddayPhase)->Activate();
       isMoreActive = true;
@@ -361,8 +363,8 @@ class DayPhaseManager : public Process
       isMoreActive = false;
 
       // Afternoon Phase
-      Print((parseTime(Time) + "\n").c_str());
-      Print("Starting Afternoon Phase\n");
+      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
+      if(debugPrints) Print("Starting Afternoon Phase\n");
       isProductive = false;
       (new AfternoonPhase)->Activate();
       isLessActive = true; 
@@ -370,8 +372,8 @@ class DayPhaseManager : public Process
       isLessActive = false;
 
       // Night Phase
-      Print((parseTime(Time) + "\n").c_str());
-      Print("Starting Night Phase\n");
+      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
+      if(debugPrints) Print("Starting Night Phase\n");
       isProductive = true; 
       isSleeping = true;
       (new NightPhase)->Activate();
@@ -379,7 +381,7 @@ class DayPhaseManager : public Process
       //Wait(Uniform(7 * 60 * 60, 9 * 60 * 60)); // Night phase lasts for 7-9 hours
 
       int currentTime = (int)Time % (24 * 60 * 60);
-      Print(("Current time: " + parseTime(currentTime) + "\n").c_str());
+      if(debugPrints) Print(("Current time: " + parseTime(currentTime) + "\n").c_str());
       int wakeUpTime = 6 * 60 * 60; // 6:00 AM 
       int timeUntilWakeUp;
 
@@ -391,11 +393,11 @@ class DayPhaseManager : public Process
         timeUntilWakeUp = (24 * 60 * 60) - currentTime + wakeUpTime;
       }
 
-      Print(("User will wake up in " + parseTime(timeUntilWakeUp) + "\n").c_str());
+      if(debugPrints) Print(("User will wake up in " + parseTime(timeUntilWakeUp) + "\n").c_str());
       Wait(timeUntilWakeUp); 
       isSleeping = false;
 
-      Print("User wakes up at 6:00 AM\n");
+      if(debugPrints) Print("User wakes up at 6:00 AM\n");
 
     }
   }
@@ -412,7 +414,7 @@ void makeTest(
   double lengthOfAddLow,
   double lengthOfAddHigh,
   bool autoregulate,
-  int numberOfDaysToSimulate = 1) {
+  int numberOfDaysToSimulate = 28) {
   
   // set inputs
   ::postArrivalTime = postArrivalTime;
