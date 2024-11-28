@@ -55,6 +55,9 @@ int numberOfIrrelevantAdds = 0;
 int numberOfSkippedPosts = 0;
 int numberOfSkippedAdds = 0;
 
+double AddArrivalTimeUpScale = 1.6;
+double AddArrivalTimeDownScale = 0.9;
+
 string parseTime(int time) {
   int day = time / (24*60*60);
   int hours = (time % (24*60*60)) / 3600;
@@ -124,23 +127,25 @@ class Add : public Process {
     addCount6++;
     addCount11++;
 
-    if (addCount6 == 4) {
+    if (addCount6 >= 3) {
       if (autoregulate) {
-        addArrivalTime = addArrivalTime * 1.2;
+        addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
       }
-    } else if (addCount6 > 5) {
+    }
+    if (addCount6 > 5) {
       addCount6 = 0;
       addFatigue6Vector.push_back(Time);
       MoreThan5AddsPerDay(getDayFromTime(Time));
     }
 
-    if (addCount11 == 9) {
+    if (addCount11 >= 8) {
       if (autoregulate) {
-        addArrivalTime = addArrivalTime * 1.2;
+        addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
       }
-    } else if (addCount11 > 10) {
+    }
+    if (addCount11 > 10) {
       addCount11 = 0;
       addFatigue11Vector.push_back(Time);
       MoreThan10AddsPerDay(getDayFromTime(Time));
@@ -177,7 +182,7 @@ class PostGenerator : public Event {
 class AddGenerator : public Event {
   void Behavior() {
     (new Add(Uniform(lengthOfAddLow, lengthOfAddHigh)))->Activate();
-    Activate(Time+Exponential(addArrivalTime));
+    Activate(Time+addArrivalTime);
   }
 };
 
@@ -205,10 +210,10 @@ class AddFatigue11Digester : public Event {
 class DayStatistics : public Event {
   void Behavior() {
     if (autoregulate) {
-      addArrivalTime = addArrivalTime * 0.99;
+      addArrivalTime = addArrivalTime * AddArrivalTimeDownScale;
       addArrivalTimeStat(addArrivalTime);
     }
-    DayStatistics::Activate(Time+(24*60*60*2));
+    DayStatistics::Activate(Time+(24*60*60));
   }
 };
 
