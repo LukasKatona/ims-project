@@ -36,6 +36,9 @@ Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0,1,numberOfDaysToSi
 
 Stat addArrivalTimeStat("Add arrival time");
 
+Stat PostsPerScrolling("Number of posts viewed per scrolling phase");
+Stat AdsPerScrolling("Number of ads viewed per scrolling phase");
+
 // Variables
 int postCount = 0;
 int addCount = 0;
@@ -58,6 +61,13 @@ int numberOfSkippedAdds = 0;
 double AddArrivalTimeUpScale = 1.6;
 double AddArrivalTimeDownScale = 0.9;
 
+bool isProductive = false;
+bool isLessActive = false;
+bool isMoreActive = false;
+bool isSleeping = false;
+int postsViewedInScrolling = 0;
+int adsViewedInScrolling = 0;
+
 string parseTime(int time) {
   int day = time / (24*60*60);
   int hours = (time % (24*60*60)) / 3600;
@@ -76,53 +86,76 @@ int getHourFromTime(int time) {
   return hour;
 }
 
-class Post : public Process {
-  public:
-    Post(int lengthOfPost) : Process() {
-      this->lengthOfPost = lengthOfPost;
-    }
-    int lengthOfPost;
+class Post : public Process
+{
+public:
+  Post(int lengthOfPost) : Process()
+  {
+    this->lengthOfPost = lengthOfPost;
+  }
+  int lengthOfPost;
 
   double ArrivalTime;
-  void Behavior() {
-    Seize(User);
-    ArrivalTime = Time;    
-    
+  void Behavior()
+  {
+    if (isProductive)
+    {
+      // Wait until the user becomes available (productive period ends)
+      Passivate();
+    }
+
+    Seize(User); // Attempt to seize the User facility (queue if busy)
+    ArrivalTime = Time;
+
     postCount++;
 
     double currentAttentionSpan = Exponential(attentionSpan);
-    if (currentAttentionSpan < lengthOfPost) {
+    if (currentAttentionSpan < lengthOfPost)
+    {
       Wait(currentAttentionSpan);
       numberOfSkippedPosts++;
-    } else {
+    }
+    else
+    {
       Wait(lengthOfPost);
-      double probabilityOfGoodPost = Uniform(0,1);
-      if (probabilityOfGoodPost > 0.44) {
+      double probabilityOfGoodPost = Uniform(0, 1);
+      if (probabilityOfGoodPost > 0.44)
+      {
         numberOfRelevantPosts++;
-      } else {
+      }
+      else
+      {
         numberOfIrrelevantPosts++;
       }
     }
-       
+
     Release(User);
-    PostTable(Time-ArrivalTime);
+    PostTable(Time - ArrivalTime);
     PostsPerDay(getDayFromTime(Time));
     PostsPerHour(getHourFromTime(Time));
   }
 };
 
-class Add : public Process {
-  public:
-    Add(int lengthOfAdd) : Process() {
-      this->lengthOfAdd = lengthOfAdd;
-    }
-    int lengthOfAdd;
+class Add : public Process
+{
+public:
+  Add(int lengthOfAdd) : Process()
+  {
+    this->lengthOfAdd = lengthOfAdd;
+  }
+  int lengthOfAdd;
 
   double ArrivalTime;
-  void Behavior() {
+  void Behavior()
+  {
+    if (isProductive)
+    {
+      Passivate();
+    }
+
     Seize(User);
-    ArrivalTime = Time;    
-    
+    ArrivalTime = Time;
+
     addCount++;
     addCount6++;
     addCount11++;
@@ -152,35 +185,45 @@ class Add : public Process {
     }
 
     double currentAttentionSpan = Exponential(attentionSpan);
-    if (currentAttentionSpan < lengthOfAdd) {
+    if (currentAttentionSpan < lengthOfAdd)
+    {
       Wait(currentAttentionSpan);
       numberOfSkippedAdds++;
-    } else {
+    }
+    else
+    {
       Wait(lengthOfAdd);
-      double probabilityOfGoodAdd = Uniform(0,1);
-      if (probabilityOfGoodAdd > 0.44) {
+      double probabilityOfGoodAdd = Uniform(0, 1);
+      if (probabilityOfGoodAdd > 0.44)
+      {
         numberOfRelevantAdds++;
-      } else {
+      }
+      else
+      {
         numberOfIrrelevantAdds++;
       }
     }
-    
+
     Release(User);
-    AddTable(Time-ArrivalTime);
+    AddTable(Time - ArrivalTime);
     AddsPerDay(getDayFromTime(Time));
     AddsPerHour(getHourFromTime(Time));
   }
 };
 
-class PostGenerator : public Event {
-  void Behavior() {
+class PostGenerator : public Event
+{
+  void Behavior()
+  {
     (new Post(Uniform(lengthOfPostLow, lengthOfPostHigh)))->Activate();
-    Activate(Time+Exponential(postArrivalTime));
+    Activate(Time + Exponential(postArrivalTime));
   }
 };
 
-class AddGenerator : public Event {
-  void Behavior() {
+class AddGenerator : public Event
+{
+  void Behavior()
+  {
     (new Add(Uniform(lengthOfAddLow, lengthOfAddHigh)))->Activate();
     Activate(Time+addArrivalTime);
   }
@@ -192,7 +235,7 @@ class AddFatigue6Digester : public Event {
     if (addCount6 > 0) {
       addCount6--;
     }
-    AddFatigue6Digester::Activate(Time+(24*60*60/6));
+    AddFatigue6Digester::Activate(Time + (24 * 60 * 60 / 6));
   }
 };
 
@@ -202,7 +245,7 @@ class AddFatigue11Digester : public Event {
     if (addCount11 > 0) {
       addCount11--;
     }
-    AddFatigue11Digester::Activate(Time+(24*60*60/11));
+    AddFatigue11Digester::Activate(Time + (24 * 60 * 60 / 11));
   }
 };
 
@@ -217,7 +260,136 @@ class DayStatistics : public Event {
   }
 };
 
+class UserActivityManager : public Process
+{
+  void Behavior() override
+  {
+    while (1)
+    {
+      if (isProductive)
+      {
+        if (isLessActive)
+        {
+          Wait(Uniform(30 * 60, 45 * 60)); // 30-45 minutes of productive activity
+        }
+        else
+        {
+          Wait(Uniform(10 * 60, 15 * 60)); // 10-15 minutes of productive activity
+        }
+        isProductive = false;
+      }
+      else
+      {
+        if (isLessActive)
+        {
+          Wait(Uniform(5 * 60, 8 * 60)); // 5-8 minutes of scrolling time
+        }
+        else
+        {
+          Wait(Uniform(30 * 60, 45 * 60)); // 30-45 minutes of scrolling time
+        }
+        isProductive = true; 
+      }
+    }
+  }
+};
 
+class MorningPhase : public Event
+{
+  void Behavior() override
+  {
+    (new UserActivityManager)->Activate();
+  }
+};
+
+class MiddayPhase : public Event
+{
+  void Behavior() override
+  {
+    (new UserActivityManager)->Activate();
+  }
+};
+
+class AfternoonPhase : public Event
+{
+  void Behavior() override
+  {
+    (new UserActivityManager)->Activate();
+  }
+};
+
+class NightPhase : public Event
+{
+  void Behavior() override
+  {
+    (new UserActivityManager)->Activate();
+    Passivate(); 
+  }
+};
+
+class DayPhaseManager : public Process
+{
+  void Behavior() override
+  {
+    while (true)
+    {
+      // Morning Phase
+      Print((parseTime(Time) + "\n").c_str());
+      Print("Starting Morning Phase\n");
+      isProductive = false;
+      (new MorningPhase)->Activate(); 
+      isLessActive = true;
+      Wait(Uniform(2 * 60 * 60, 4 * 60 * 60)); // Morning phase lasts for 2-4 hours
+      isLessActive = false;
+
+      // Midday Phase
+      Print((parseTime(Time) + "\n").c_str());
+      Print("Starting Midday Phase\n");
+      isProductive = false;
+      (new MiddayPhase)->Activate();
+      isMoreActive = true;
+      Wait(Uniform(2 * 60 * 60, 4 * 60 * 60)); // Midday phase lasts for 2-4 hours
+      isMoreActive = false;
+
+      // Afternoon Phase
+      Print((parseTime(Time) + "\n").c_str());
+      Print("Starting Afternoon Phase\n");
+      isProductive = false;
+      (new AfternoonPhase)->Activate();
+      isLessActive = true; 
+      Wait(Uniform(8 * 60 * 60, 10 * 60 * 60)); // Afternoon phase lasts for 8-10 hours
+      isLessActive = false;
+
+      // Night Phase
+      Print((parseTime(Time) + "\n").c_str());
+      Print("Starting Night Phase\n");
+      isProductive = true;
+      (new NightPhase)->Activate();
+      isSleeping = true;
+      //Wait(Uniform(7 * 60 * 60, 9 * 60 * 60)); // Night phase lasts for 7-9 hours
+
+      int currentTime = (int)Time % (24 * 60 * 60);
+      Print(("Current time: " + parseTime(currentTime) + "\n").c_str());
+      int wakeUpTime = 6 * 60 * 60; // 6:00 AM 
+      int timeUntilWakeUp;
+
+      if (currentTime < wakeUpTime) {
+        // It's before 6:00 AM
+        timeUntilWakeUp = wakeUpTime - currentTime;
+      } else {
+        // It's after 6:00 AM
+        timeUntilWakeUp = (24 * 60 * 60) - currentTime + wakeUpTime;
+      }
+
+      Print(("User will wake up in " + parseTime(timeUntilWakeUp) + "\n").c_str());
+      Wait(timeUntilWakeUp); 
+      isSleeping = false;
+
+      Print("User wakes up at 6:00 AM\n");
+
+    }
+  }
+};
 
 
 void makeTest(
@@ -241,9 +413,12 @@ void makeTest(
   ::lengthOfAddLow = lengthOfAddLow;
   ::lengthOfAddHigh = lengthOfAddHigh;
   ::autoregulate = autoregulate;
+
   addArrivalTimeStat(addArrivalTime);
 
-  // set output
+  // set output  isProductive = false;
+  
+
   SetOutput(testOutput.c_str());
 
   // print model description
@@ -263,9 +438,11 @@ void makeTest(
   User.Clear();
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
-  (new AddFatigue6Digester)->Activate(24*60*60/6);
-  (new AddFatigue11Digester)->Activate(24*60*60/11);
+  (new AddFatigue6Digester)->Activate(24 * 60 * 60 / 6);
+  (new AddFatigue11Digester)->Activate(24 * 60 * 60 / 11);
+  (new DayPhaseManager)->Activate();
   (new DayStatistics)->Activate(24*60*60);
+  
   Run();
 
   // print statistics
@@ -292,7 +469,7 @@ void makeTest(
   MoreThan10AddsPerDay.Output();
   addArrivalTimeStat.Output();
 
-  // clear statistics
+  // clear variables
   postCount = 0;
   addCount = 0;
   addCount6 = 0;
@@ -305,7 +482,11 @@ void makeTest(
   numberOfIrrelevantAdds = 0;
   numberOfSkippedPosts = 0;
   numberOfSkippedAdds = 0;
+  isLessActive = false;
+  isMoreActive = false;
+  isSleeping = false;
 
+  // clear statistics
   PostTable.Clear();
   AddTable.Clear();
   PostsPerDay.Clear();
@@ -337,5 +518,6 @@ int main() {
 
   printf("test-longer-simulation-time-autoregulate\n");
   makeTest("tests/test-longer-simulation-time-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true, 28*5);
+  printf("test-less-active\n");
+  makeTest("tests/test-less-active.out", 10, 100, 40, 5, 30, 10, 30, true); // Adjust ad arrival time
 }
-
