@@ -268,6 +268,7 @@ class UserActivityManager : public Process
     {
       if (isProductive)
       {
+        
         if (isLessActive)
         {
           Wait(Uniform(30 * 60, 45 * 60)); // 30-45 minutes of productive activity
@@ -276,10 +277,18 @@ class UserActivityManager : public Process
         {
           Wait(Uniform(10 * 60, 15 * 60)); // 10-15 minutes of productive activity
         }
-        isProductive = false;
+        if(isSleeping) {
+          Print("User is sleeping\n");
+          isProductive = true;
+        }
+        else {
+          Print("User is productive\n");
+          isProductive = false;
+        }
       }
       else
       {
+        Print("User is scrolling\n");
         if (isLessActive)
         {
           Wait(Uniform(5 * 60, 8 * 60)); // 5-8 minutes of scrolling time
@@ -363,9 +372,10 @@ class DayPhaseManager : public Process
       // Night Phase
       Print((parseTime(Time) + "\n").c_str());
       Print("Starting Night Phase\n");
-      isProductive = true;
-      (new NightPhase)->Activate();
+      isProductive = true; 
       isSleeping = true;
+      (new NightPhase)->Activate();
+     
       //Wait(Uniform(7 * 60 * 60, 9 * 60 * 60)); // Night phase lasts for 7-9 hours
 
       int currentTime = (int)Time % (24 * 60 * 60);
@@ -402,7 +412,7 @@ void makeTest(
   double lengthOfAddLow,
   double lengthOfAddHigh,
   bool autoregulate,
-  int numberOfDaysToSimulate = 28) {
+  int numberOfDaysToSimulate = 1) {
   
   // set inputs
   ::postArrivalTime = postArrivalTime;
@@ -506,6 +516,7 @@ int main() {
     }
   }
 
+/*
   printf("test\n");
   makeTest("tests/test.out", 10, 1000, 40, 5, 30, 10, 30, false);
   printf("test-autoregulate\n");
@@ -518,6 +529,7 @@ int main() {
 
   printf("test-longer-simulation-time-autoregulate\n");
   makeTest("tests/test-longer-simulation-time-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true, 28*5);
+*/  
   printf("test-less-active\n");
   makeTest("tests/test-less-active.out", 10, 100, 40, 5, 30, 10, 30, true); // Adjust ad arrival time
 }
