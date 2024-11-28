@@ -56,10 +56,8 @@ int numberOfSkippedAdds = 0;
 
 double AddArrivalTimeUpScale = 1.6;
 double AddArrivalTimeDownScale = 0.9;
+int autoregulateThreshold = 4;
 
-bool isProductive = false;
-bool isLessActive = false;
-bool isMoreActive = false;
 int productiveLow = 30 * 60;
 int productiveHigh = 45 * 60;
 int scrollingLow = 5 * 60;
@@ -161,7 +159,6 @@ public:
   double ArrivalTime;
   void Behavior()
   {
-
     Seize(User);
     ArrivalTime = Time;
 
@@ -169,7 +166,7 @@ public:
     addCount6++;
     (new AddFatigue6Digester)->Activate(Time + (24 * 60 * 60 / 6));
 
-    if (addCount6 == 4) {
+    if (addCount6 == autoregulateThreshold) {
       if (autoregulate) {
         addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
@@ -221,8 +218,6 @@ class AddGenerator : public Event
     Activate(Time + addArrivalTime);
   }
 };
-
-
 
 // make statistics about day
 class DayStatistics : public Event
@@ -369,7 +364,7 @@ void makeTest(
   bool autoregulate,
   int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE) {
     
-  // set output  isProductive = false;
+  // set output file
   if (system(("test -d tests/" + testOutput).c_str()) != 0) {
     if (system(("mkdir tests/" + testOutput).c_str())) {
       printf("Error creating tests folder\n");
@@ -391,7 +386,7 @@ void makeTest(
   addArrivalTimeStat(addArrivalTime);
 
   // print model description
-  Print(" Model simulating user activity on social media, keeping track of how many adds user sees in comparison to posts.\n");
+  Print((testOutput+"\n").c_str());
   Print(" Model inputs:\n");
   Print(" - postArrivalTime: %f\n", postArrivalTime);
   Print(" - addArrivalTime: %f\n", addArrivalTime);
@@ -408,7 +403,6 @@ void makeTest(
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
   (new DayPhaseManager)->Activate();
-  //(new UserActivityManager)->Activate();
   (new DayStatistics)->Activate(24 * 60 * 60);
 
   Run();
