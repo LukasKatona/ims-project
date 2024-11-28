@@ -44,22 +44,35 @@ def parse_histogram_section(lines, start_index, is_day_histogram):
 
 def plot_histogram(bins, frequencies, output_path, title, xlabel, ylabel):
     """
-    Create and save a histogram graph using matplotlib with dynamic width.
+    Create and save a histogram graph using matplotlib with dynamic width
+    and average value displayed.
     """
     # Calculate width dynamically: base width + extra width for larger datasets
     base_width = 8
     extra_width_per_bin = 0.2
     dynamic_width = base_width + len(bins) * extra_width_per_bin
 
+    # Calculate the average frequency
+    average_value = sum(frequencies) / len(frequencies) if frequencies else 0
+
     plt.figure(figsize=(dynamic_width, 6))
     plt.bar(bins, frequencies, color='skyblue', alpha=0.7)
+
+    # Add a horizontal line for the average value
+    plt.axhline(y=average_value, color='red', linestyle='--', label=f'Average: {average_value:.2f}')
+
+    # Add title, labels, and legend
     plt.title(title, fontsize=16)
     plt.xlabel(xlabel, fontsize=12)
     plt.ylabel(ylabel, fontsize=12)
     plt.xticks(rotation=45, ha='right')
+    plt.legend(fontsize=12)
+
+    # Adjust layout and save the plot
     plt.tight_layout()
     plt.savefig(output_path)
     plt.close()
+
 
 
 

@@ -34,9 +34,6 @@ Histogram AddsPerDay("Adds seen per day", 0,1,numberOfDaysToSimulate);
 Histogram PostsPerHour("Posts seen per hour", 0,1,numberOfDaysToSimulate*24);
 Histogram AddsPerHour("Adds seen per hour", 0,1,numberOfDaysToSimulate*24);
 
-Histogram MoreThan5AddsPerDay("More than 5 adds seen per day", 0,1,numberOfDaysToSimulate);
-Histogram MoreThan10AddsPerDay("More than 10 adds seen per day", 0,1,numberOfDaysToSimulate);
-
 Stat addArrivalTimeStat("Add arrival time");
 
 Stat PostsPerScrolling("Number of posts viewed per scrolling phase");
@@ -47,10 +44,6 @@ int postCount = 0;
 int addCount = 0;
 
 int addCount6 = 0;
-vector<int> addFatigue6Vector;
-
-int addCount11 = 0;
-vector<int> addFatigue11Vector;
 
 int numberOfRelevantPosts = 0;
 int numberOfRelevantAdds = 0;
@@ -88,6 +81,15 @@ int getHourFromTime(int time) {
   int hour = time / (60*60);
   return hour;
 }
+
+// periodicaly decrease fatigue
+class AddFatigue6Digester : public Event {
+  void Behavior() {
+    if (addCount6 > 0) {
+      addCount6--;
+    }
+  }
+};
 
 class Post : public Process
 {
@@ -161,30 +163,14 @@ public:
 
     addCount++;
     addCount6++;
-    addCount11++;
+    (new AddFatigue6Digester)->Activate(Time + (24 * 60 * 60 / 6));
 
-    if (addCount6 >= 3) {
+    if (addCount6 == 4) {
       if (autoregulate) {
         addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
       }
-    }
-    if (addCount6 > 5) {
       addCount6 = 0;
-      addFatigue6Vector.push_back(Time);
-      MoreThan5AddsPerDay(getDayFromTime(Time));
-    }
-
-    if (addCount11 >= 8) {
-      if (autoregulate) {
-        addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
-        addArrivalTimeStat(addArrivalTime);
-      }
-    }
-    if (addCount11 > 10) {
-      addCount11 = 0;
-      addFatigue11Vector.push_back(Time);
-      MoreThan10AddsPerDay(getDayFromTime(Time));
     }
 
     double currentAttentionSpan = Exponential(attentionSpan);
@@ -232,25 +218,7 @@ class AddGenerator : public Event
   }
 };
 
-// periodicaly decrease fatigue
-class AddFatigue6Digester : public Event {
-  void Behavior() {
-    if (addCount6 > 0) {
-      addCount6--;
-    }
-    AddFatigue6Digester::Activate(Time + (24 * 60 * 60 / 6));
-  }
-};
 
-// periodicaly decrease fatigue
-class AddFatigue11Digester : public Event {
-  void Behavior() {
-    if (addCount11 > 0) {
-      addCount11--;
-    }
-    AddFatigue11Digester::Activate(Time + (24 * 60 * 60 / 11));
-  }
-};
 
 //make statistics about day
 class DayStatistics : public Event {
@@ -455,8 +423,6 @@ void makeTest(
   User.Clear();
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
-  (new AddFatigue6Digester)->Activate(24 * 60 * 60 / 6);
-  (new AddFatigue11Digester)->Activate(24 * 60 * 60 / 11);
   (new DayPhaseManager)->Activate();
   (new DayStatistics)->Activate(24*60*60);
   
@@ -473,26 +439,18 @@ void makeTest(
   Print("Irrelevant adds: %d\n", numberOfIrrelevantAdds);
   Print("Skipped adds: %d\n", numberOfSkippedAdds);
 
-  Print("\nUser saw more than 5 adds in a day: %d\n", addFatigue6Vector.size());
-  Print("User saw more than 10 adds in a day: %d\n", addFatigue11Vector.size());
-
   PostTable.Output();
   AddTable.Output();
   PostsPerDay.Output();
   PostsPerHour.Output();
   AddsPerDay.Output();
   AddsPerHour.Output();
-  MoreThan5AddsPerDay.Output();
-  MoreThan10AddsPerDay.Output();
   addArrivalTimeStat.Output();
 
   // clear variables
   postCount = 0;
   addCount = 0;
   addCount6 = 0;
-  addFatigue6Vector = vector<int>();
-  addCount11 = 0;
-  addFatigue11Vector = vector<int>();
   numberOfRelevantPosts = 0;
   numberOfRelevantAdds = 0;
   numberOfIrrelevantPosts = 0;
@@ -510,8 +468,6 @@ void makeTest(
   PostsPerHour.Clear();
   AddsPerDay.Clear();
   AddsPerHour.Clear();
-  MoreThan5AddsPerDay.Clear();
-  MoreThan10AddsPerDay.Clear();
   addArrivalTimeStat.Clear();
 }
 
@@ -529,12 +485,12 @@ int main() {
   printf("test-autoregulate\n");
   makeTest("test-autoregulate", 10, 1000, 40, 5, 30, 10, 30, true);
 
-  // printf("test-small-attention-span\n");
-  // makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
+  printf("test-small-attention-span\n");
+  makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
 
-  // printf("test-small-attention-span-autoregulate\n");
-  // makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
+  printf("test-small-attention-span-autoregulate\n");
+  makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
 
-  // printf("test-less-active\n");
-  // makeTest("test-less-active", 10, 100, 40, 5, 30, 10, 30, true, 1);
+  printf("test-less-active\n");
+  makeTest("test-less-active", 10, 100, 40, 5, 30, 10, 30, true, 1);
 }
