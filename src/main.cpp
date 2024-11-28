@@ -5,7 +5,7 @@
 using namespace std;
 
 bool debugPrints = true;
-const int DEFAULT_DAYS_TO_SIMULATE = 7;
+const int DEFAULT_DAYS_TO_SIMULATE = 28;
 
 // Model inputs
 double postArrivalTime = 10;
@@ -112,15 +112,13 @@ public:
   }
   int lengthOfPost;
 
-  double ArrivalTime;
   void Behavior()
   {
     Seize(User); // Attempt to seize the User facility (queue if busy)
-    ArrivalTime = Time;
 
     postCount++;
 
-    double currentAttentionSpan = Exponential(attentionSpan);
+    double currentAttentionSpan = Normal(attentionSpan, 5);
     if (currentAttentionSpan < lengthOfPost)
     {
       Wait(currentAttentionSpan);
@@ -141,7 +139,7 @@ public:
     }
 
     Release(User);
-    PostTable(Time - ArrivalTime);
+    PostTable(lengthOfPost);
     PostsPerDay(getDayFromTime(Time));
     PostsPerHour(getHourFromTime(Time));
   }
@@ -156,11 +154,9 @@ public:
   }
   int lengthOfAdd;
 
-  double ArrivalTime;
   void Behavior()
   {
     Seize(User);
-    ArrivalTime = Time;
 
     addCount++;
     addCount6++;
@@ -174,7 +170,7 @@ public:
       addCount6 = 0;
     }
 
-    double currentAttentionSpan = Exponential(attentionSpan);
+    double currentAttentionSpan = Normal(attentionSpan, 5);
     if (currentAttentionSpan < lengthOfAdd)
     {
       Wait(currentAttentionSpan);
@@ -195,7 +191,7 @@ public:
     }
 
     Release(User);
-    AddTable(Time - ArrivalTime);
+    AddTable(lengthOfAdd);
     AddsPerDay(getDayFromTime(Time));
     AddsPerHour(getHourFromTime(Time));
   }
@@ -235,6 +231,9 @@ class DayStatistics : public Event
 
 class UserActivityManager : public Process
 {
+  public:
+    UserActivityManager() : Process(1) {}
+    
   void Behavior() override
   {
     double startTime = Time;
@@ -242,7 +241,7 @@ class UserActivityManager : public Process
 
     while (1)
     {
-      Seize(User, 1);
+      Seize(User);
       if (debugPrints)
       {
         Print("User is productive at ");
@@ -273,6 +272,8 @@ class UserActivityManager : public Process
 
 class DayPhaseManager : public Process
 {
+  public:
+    DayPhaseManager() : Process(2) {}
   void Behavior() override
   {
     (new UserActivityManager)->Activate();
@@ -326,7 +327,7 @@ class DayPhaseManager : public Process
         Print("Starting Night Phase\n");
       }
 
-      Seize(User, 2);
+      Seize(User);
       int currentTime = (int)Time % (24 * 60 * 60);
       if (debugPrints)
         Print(("Current time: " + parseTime(currentTime) + "\n").c_str());
@@ -404,7 +405,6 @@ void makeTest(
   (new AddGenerator)->Activate();
   (new DayPhaseManager)->Activate();
   (new DayStatistics)->Activate(24 * 60 * 60);
-
   Run();
 
   // print statistics
@@ -460,16 +460,11 @@ int main()
 
   printf("test\n");
   makeTest("test", 10, 1000, 40, 5, 30, 10, 30, false);
-
   printf("test-autoregulate\n");
   makeTest("test-autoregulate", 10, 1000, 40, 5, 30, 10, 30, true);
 
-  printf("test-small-attention-span\n");
-  makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
-
-  printf("test-small-attention-span-autoregulate\n");
-  makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
-
-  printf("test-less-active\n");
-  makeTest("test-less-active", 10, 100, 40, 5, 30, 10, 30, true, 1);
+  // printf("test-small-attention-span\n");
+  // makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
+  // printf("test-small-attention-span-autoregulate\n");
+  // makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
 }

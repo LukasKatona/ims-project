@@ -55,23 +55,46 @@ def plot_histogram(bins, frequencies, output_path, title, xlabel, ylabel):
     # Calculate the average frequency
     average_value = sum(frequencies) / len(frequencies) if frequencies else 0
 
+    # calculate median value
+    median_value = frequencies[len(frequencies) // 2]
+
     plt.figure(figsize=(dynamic_width, 6))
     plt.bar(bins, frequencies, color='skyblue', alpha=0.7)
 
-    # Add a horizontal line for the average value
-    plt.axhline(y=average_value, color='red', linestyle='--', label=f'Average: {average_value:.2f}')
+    # Initialize a list to store the labels for the legend
+    legend_labels = []
+
+    
+
+    if "adds seen per day" in title.lower():
+        plt.axhline(y=5, color='red', linestyle='--', label='Max 5 Adds per Day')
+        legend_labels.append('Max 5 Adds per Day')
+        plt.axhline(y=median_value, color='green', linestyle='--', label=f'Median: {median_value:.2f}')
+        legend_labels.append(f'Median: {median_value:.2f}')
+    elif "length" not in title.lower():
+        plt.axhline(y=average_value, color='orange', linestyle='--', label=f'Average: {average_value:.2f}')
+        legend_labels.append(f'Average: {average_value:.2f}')
+
+
+    # If no lines are added, add a default label
+    if not legend_labels:
+        legend_labels.append('No data lines')
 
     # Add title, labels, and legend
     plt.title(title, fontsize=16)
     plt.xlabel(xlabel, fontsize=12)
     plt.ylabel(ylabel, fontsize=12)
     plt.xticks(rotation=45, ha='right')
-    plt.legend(fontsize=12)
+
+    # Display legend only if there are labels
+    if legend_labels:
+        plt.legend(legend_labels, fontsize=12)
 
     # Adjust layout and save the plot
     plt.tight_layout()
     plt.savefig(output_path)
     plt.close()
+
 
 
 
