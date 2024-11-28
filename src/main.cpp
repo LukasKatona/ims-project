@@ -4,7 +4,7 @@
 
 using namespace std;
 
-bool debugPrints = false;
+bool debugPrints = true;
 
 // Model inputs
 double postArrivalTime = 10;
@@ -22,19 +22,19 @@ bool autoregulate = true;
 int numberOfDaysToSimulate = 28;
 
 // Global objects
-Facility  User("User");
+Facility User("User");
 
-Histogram PostTable("Length of Posts",5,1,25);
-Histogram AddTable("Length of Adds",10,1,20);
+Histogram PostTable("Length of Posts", 5, 1, 25);
+Histogram AddTable("Length of Adds", 10, 1, 20);
 
-Histogram PostsPerDay("Posts per day", 0,1,numberOfDaysToSimulate);
-Histogram AddsPerDay("Adds per day", 0,1,numberOfDaysToSimulate);
+Histogram PostsPerDay("Posts per day", 0, 1, numberOfDaysToSimulate);
+Histogram AddsPerDay("Adds per day", 0, 1, numberOfDaysToSimulate);
 
-Histogram PostsPerHour("Posts per hour", 0,1,numberOfDaysToSimulate*24);
-Histogram AddsPerHour("Adds per hour", 0,1,numberOfDaysToSimulate*24);
+Histogram PostsPerHour("Posts per hour", 0, 1, numberOfDaysToSimulate * 24);
+Histogram AddsPerHour("Adds per hour", 0, 1, numberOfDaysToSimulate * 24);
 
-Histogram MoreThan5AddsPerDay("More than 5 adds per day", 0,1,numberOfDaysToSimulate);
-Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0,1,numberOfDaysToSimulate);
+Histogram MoreThan5AddsPerDay("More than 5 adds per day", 0, 1, numberOfDaysToSimulate);
+Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0, 1, numberOfDaysToSimulate);
 
 Stat addArrivalTimeStat("Add arrival time");
 
@@ -66,25 +66,39 @@ double AddArrivalTimeDownScale = 0.9;
 bool isProductive = false;
 bool isLessActive = false;
 bool isMoreActive = false;
-bool isSleeping = false;
-int postsViewedInScrolling = 0;
-int adsViewedInScrolling = 0;
+int productiveLow = 30 * 60;
+int productiveHigh = 45 * 60;
+int scrollingLow = 5 * 60;
+int scrollingHigh = 8 * 60;
+int timeUntilWakeUp;
 
-string parseTime(int time) {
-  int day = time / (24*60*60);
-  int hours = (time % (24*60*60)) / 3600;
+string parseTime(int time)
+{
+  int day = time / (24 * 60 * 60);
+  int hours = (time % (24 * 60 * 60)) / 3600;
   int minutes = (time % 3600) / 60;
   int seconds = time % 60;
   return to_string(day) + "d " + to_string(hours) + "h " + to_string(minutes) + "m " + to_string(seconds) + "s";
 }
 
-int getDayFromTime(int time) {
-  int day = time / (24*60*60);
+string parseShortTime(int time)
+{
+  int day = time / (24 * 60 * 60);
+  int hours = (time % (24 * 60 * 60)) / 3600;
+  int minutes = (time % 3600) / 60;
+  int seconds = time % 60;
+  return to_string(minutes) + "m " + to_string(seconds) + "s";
+}
+
+int getDayFromTime(int time)
+{
+  int day = time / (24 * 60 * 60);
   return day;
 }
 
-int getHourFromTime(int time) {
-  int hour = time / (60*60);
+int getHourFromTime(int time)
+{
+  int hour = time / (60 * 60);
   return hour;
 }
 
@@ -100,12 +114,6 @@ public:
   double ArrivalTime;
   void Behavior()
   {
-    if (isProductive)
-    {
-      // Wait until the user becomes available (productive period ends)
-      Passivate();
-    }
-
     Seize(User); // Attempt to seize the User facility (queue if busy)
     ArrivalTime = Time;
 
@@ -150,10 +158,6 @@ public:
   double ArrivalTime;
   void Behavior()
   {
-    if (isProductive)
-    {
-      Passivate();
-    }
 
     Seize(User);
     ArrivalTime = Time;
@@ -162,25 +166,31 @@ public:
     addCount6++;
     addCount11++;
 
-    if (addCount6 >= 3) {
-      if (autoregulate) {
+    if (addCount6 >= 3)
+    {
+      if (autoregulate)
+      {
         addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
       }
     }
-    if (addCount6 > 5) {
+    if (addCount6 > 5)
+    {
       addCount6 = 0;
       addFatigue6Vector.push_back(Time);
       MoreThan5AddsPerDay(getDayFromTime(Time));
     }
 
-    if (addCount11 >= 8) {
-      if (autoregulate) {
+    if (addCount11 >= 8)
+    {
+      if (autoregulate)
+      {
         addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
       }
     }
-    if (addCount11 > 10) {
+    if (addCount11 > 10)
+    {
       addCount11 = 0;
       addFatigue11Vector.push_back(Time);
       MoreThan10AddsPerDay(getDayFromTime(Time));
@@ -227,14 +237,17 @@ class AddGenerator : public Event
   void Behavior()
   {
     (new Add(Uniform(lengthOfAddLow, lengthOfAddHigh)))->Activate();
-    Activate(Time+addArrivalTime);
+    Activate(Time + addArrivalTime);
   }
 };
 
 // periodicaly decrease fatigue
-class AddFatigue6Digester : public Event {
-  void Behavior() {
-    if (addCount6 > 0) {
+class AddFatigue6Digester : public Event
+{
+  void Behavior()
+  {
+    if (addCount6 > 0)
+    {
       addCount6--;
     }
     AddFatigue6Digester::Activate(Time + (24 * 60 * 60 / 6));
@@ -242,23 +255,29 @@ class AddFatigue6Digester : public Event {
 };
 
 // periodicaly decrease fatigue
-class AddFatigue11Digester : public Event {
-  void Behavior() {
-    if (addCount11 > 0) {
+class AddFatigue11Digester : public Event
+{
+  void Behavior()
+  {
+    if (addCount11 > 0)
+    {
       addCount11--;
     }
     AddFatigue11Digester::Activate(Time + (24 * 60 * 60 / 11));
   }
 };
 
-//make statistics about day
-class DayStatistics : public Event {
-  void Behavior() {
-    if (autoregulate) {
+// make statistics about day
+class DayStatistics : public Event
+{
+  void Behavior()
+  {
+    if (autoregulate)
+    {
       addArrivalTime = addArrivalTime * AddArrivalTimeDownScale;
       addArrivalTimeStat(addArrivalTime);
     }
-    DayStatistics::Activate(Time+(24*60*60));
+    DayStatistics::Activate(Time + (24 * 60 * 60));
   }
 };
 
@@ -266,75 +285,37 @@ class UserActivityManager : public Process
 {
   void Behavior() override
   {
+    double startTime = Time;
+    double duration = 0.0;
+
     while (1)
     {
-      if (isProductive)
+      Seize(User, 1);
+      if (debugPrints)
       {
-        
-        if (isLessActive)
-        {
-          Wait(Uniform(30 * 60, 45 * 60)); // 30-45 minutes of productive activity
-        }
-        else
-        {
-          Wait(Uniform(10 * 60, 15 * 60)); // 10-15 minutes of productive activity
-        }
-        if(isSleeping) {
-          if(debugPrints) Print("User is sleeping\n");
-          isProductive = true;
-        }
-        else {
-          if(debugPrints) Print("User is productive\n");
-          isProductive = false;
-        }
+        Print("User is productive at ");
+        Print((parseTime(Time) + "\n").c_str());
       }
-      else
+      Wait(Uniform(productiveLow, productiveHigh)); // 30-45 minutes of productive activity
+
+      duration = Time - startTime;
+      if (debugPrints)
+        Print(("Productive time duration: " + parseShortTime(duration) + "\n").c_str());
+      startTime = Time;
+      Release(User);
+
+      if (debugPrints)
       {
-        if(debugPrints) Print("User is scrolling\n");
-        if (isLessActive)
-        {
-          Wait(Uniform(5 * 60, 8 * 60)); // 5-8 minutes of scrolling time
-        }
-        else
-        {
-          Wait(Uniform(30 * 60, 45 * 60)); // 30-45 minutes of scrolling time
-        }
-        isProductive = true; 
+        Print("User start scrolling at ");
+        Print((parseTime(Time) + "\n").c_str());
       }
+      Wait(Uniform(scrollingLow, scrollingHigh)); // 5-8 minutes of scrolling time
+
+      duration = Time - startTime;
+      if (debugPrints)
+        Print(("Scrolling time duration: " + parseShortTime(duration) + "\n").c_str());
+      startTime = Time;
     }
-  }
-};
-
-class MorningPhase : public Event
-{
-  void Behavior() override
-  {
-    (new UserActivityManager)->Activate();
-  }
-};
-
-class MiddayPhase : public Event
-{
-  void Behavior() override
-  {
-    (new UserActivityManager)->Activate();
-  }
-};
-
-class AfternoonPhase : public Event
-{
-  void Behavior() override
-  {
-    (new UserActivityManager)->Activate();
-  }
-};
-
-class NightPhase : public Event
-{
-  void Behavior() override
-  {
-    (new UserActivityManager)->Activate();
-    Passivate(); 
   }
 };
 
@@ -342,80 +323,96 @@ class DayPhaseManager : public Process
 {
   void Behavior() override
   {
+    (new UserActivityManager)->Activate();
     while (true)
     {
       // Morning Phase
-      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
-      if(debugPrints) Print("Starting Morning Phase\n");
-      isProductive = false;
-      (new MorningPhase)->Activate(); 
-      isLessActive = true;
+      if (debugPrints)
+      {
+        Print("----------------------------------------\n");
+        Print((parseTime(Time) + "\n").c_str());
+        Print("Starting Morning Phase\n");
+      }
+
+      productiveHigh = 45 * 60;
+      productiveLow = 30 * 60;
+      scrollingLow = 5 * 60;
+      scrollingHigh = 8 * 60;
       Wait(Uniform(2 * 60 * 60, 4 * 60 * 60)); // Morning phase lasts for 2-4 hours
-      isLessActive = false;
 
       // Midday Phase
-      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
-      if(debugPrints) Print("Starting Midday Phase\n");
-      isProductive = false;
-      (new MiddayPhase)->Activate();
-      isMoreActive = true;
+      if (debugPrints)
+      {
+        Print("----------------------------------------\n");
+        Print((parseTime(Time) + "\n").c_str());
+        Print("Starting Midday Phase\n");
+      }
+      productiveHigh = 15 * 60;
+      productiveLow = 10 * 60;
+      scrollingLow = 30 * 60;
+      scrollingHigh = 45 * 60;
       Wait(Uniform(2 * 60 * 60, 4 * 60 * 60)); // Midday phase lasts for 2-4 hours
-      isMoreActive = false;
 
       // Afternoon Phase
-      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
-      if(debugPrints) Print("Starting Afternoon Phase\n");
-      isProductive = false;
-      (new AfternoonPhase)->Activate();
-      isLessActive = true; 
+      if (debugPrints)
+      {
+        Print("----------------------------------------\n");
+        Print((parseTime(Time) + "\n").c_str());
+        Print("Starting Afternoon Phase\n");
+      }
+      productiveHigh = 45 * 60;
+      productiveLow = 30 * 60;
+      scrollingLow = 5 * 60;
+      scrollingHigh = 8 * 60;
       Wait(Uniform(8 * 60 * 60, 10 * 60 * 60)); // Afternoon phase lasts for 8-10 hours
-      isLessActive = false;
 
       // Night Phase
-      if(debugPrints) Print((parseTime(Time) + "\n").c_str());
-      if(debugPrints) Print("Starting Night Phase\n");
-      isProductive = true; 
-      isSleeping = true;
-      (new NightPhase)->Activate();
-     
-      //Wait(Uniform(7 * 60 * 60, 9 * 60 * 60)); // Night phase lasts for 7-9 hours
+      if (debugPrints)
+      {
+        Print("----------------------------------------\n");
+        Print((parseTime(Time) + "\n").c_str());
+        Print("Starting Night Phase\n");
+      }
 
+      Seize(User, 2);
       int currentTime = (int)Time % (24 * 60 * 60);
-      if(debugPrints) Print(("Current time: " + parseTime(currentTime) + "\n").c_str());
-      int wakeUpTime = 6 * 60 * 60; // 6:00 AM 
-      int timeUntilWakeUp;
+      if (debugPrints)
+        Print(("Current time: " + parseTime(currentTime) + "\n").c_str());
+      int wakeUpTime = 6 * 60 * 60; // 6:00 AM
 
-      if (currentTime < wakeUpTime) {
-        // It's before 6:00 AM
+      if (currentTime < wakeUpTime)
+      {
         timeUntilWakeUp = wakeUpTime - currentTime;
-      } else {
-        // It's after 6:00 AM
+      }
+      else
+      {
         timeUntilWakeUp = (24 * 60 * 60) - currentTime + wakeUpTime;
       }
 
-      if(debugPrints) Print(("User will wake up in " + parseTime(timeUntilWakeUp) + "\n").c_str());
-      Wait(timeUntilWakeUp); 
-      isSleeping = false;
+      if (debugPrints)
+        Print(("User will wake up in " + parseTime(timeUntilWakeUp) + "\n").c_str());
+      Wait(timeUntilWakeUp);
+      Release(User);
 
-      if(debugPrints) Print("User wakes up at 6:00 AM\n");
-
+      if (debugPrints)
+        Print("User wakes up at 6:00 AM\n");
     }
   }
 };
 
-
 void makeTest(
-  string testOutput,
-  double postArrivalTime,
-  double addArrivalTime,
-  double attentionSpan,
-  double lengthOfPostLow,
-  double lengthOfPostHigh,
-  double lengthOfAddLow,
-  double lengthOfAddHigh,
-  bool autoregulate,
-  int numberOfDaysToSimulate = 28) {
-  
+    string testOutput,
+    double postArrivalTime,
+    double addArrivalTime,
+    double attentionSpan,
+    double lengthOfPostLow,
+    double lengthOfPostHigh,
+    double lengthOfAddLow,
+    double lengthOfAddHigh,
+    bool autoregulate,
+    int numberOfDaysToSimulate = 28)
+{
+
   // set inputs
   ::postArrivalTime = postArrivalTime;
   ::addArrivalTime = addArrivalTime;
@@ -429,7 +426,6 @@ void makeTest(
   addArrivalTimeStat(addArrivalTime);
 
   // set output  isProductive = false;
-  
 
   SetOutput(testOutput.c_str());
 
@@ -444,17 +440,18 @@ void makeTest(
   Print(" - lengthOfAddLow: %f\n", lengthOfAddLow);
   Print(" - lengthOfAddHigh: %f\n", lengthOfAddHigh);
   Print(" - autoregulate: %d\n", autoregulate);
- 
+
   // run simulation
-  Init(0,numberOfDaysToSimulate*24*60*60);
+  Init(0, numberOfDaysToSimulate * 24 * 60 * 60);
   User.Clear();
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
   (new AddFatigue6Digester)->Activate(24 * 60 * 60 / 6);
   (new AddFatigue11Digester)->Activate(24 * 60 * 60 / 11);
   (new DayPhaseManager)->Activate();
-  (new DayStatistics)->Activate(24*60*60);
-  
+  //(new UserActivityManager)->Activate();
+  (new DayStatistics)->Activate(24 * 60 * 60);
+
   Run();
 
   // print statistics
@@ -494,9 +491,6 @@ void makeTest(
   numberOfIrrelevantAdds = 0;
   numberOfSkippedPosts = 0;
   numberOfSkippedAdds = 0;
-  isLessActive = false;
-  isMoreActive = false;
-  isSleeping = false;
 
   // clear statistics
   PostTable.Clear();
@@ -510,28 +504,31 @@ void makeTest(
   addArrivalTimeStat.Clear();
 }
 
-int main() {
-  if (system("test -d tests") != 0) {
-    if (system("mkdir tests")) {
+int main()
+{
+  if (system("test -d tests") != 0)
+  {
+    if (system("mkdir tests"))
+    {
       printf("Error creating tests folder\n");
       return 1;
     }
   }
 
-/*
-  printf("test\n");
-  makeTest("tests/test.out", 10, 1000, 40, 5, 30, 10, 30, false);
-  printf("test-autoregulate\n");
-  makeTest("tests/test-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true);
+  /*
+    printf("test\n");
+    makeTest("tests/test.out", 10, 1000, 40, 5, 30, 10, 30, false);
+    printf("test-autoregulate\n");
+    makeTest("tests/test-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true);
 
-  printf("test-small-attention-span\n");
-  makeTest("tests/test-small-attention-span.out", 10, 1000, 10, 5, 30, 10, 30, false);
-  printf("test-small-attention-span-autoregulate\n");
-  makeTest("tests/test-small-attention-span-autoregulate.out", 10, 1000, 10, 5, 30, 10, 30, true);
+    printf("test-small-attention-span\n");
+    makeTest("tests/test-small-attention-span.out", 10, 1000, 10, 5, 30, 10, 30, false);
+    printf("test-small-attention-span-autoregulate\n");
+    makeTest("tests/test-small-attention-span-autoregulate.out", 10, 1000, 10, 5, 30, 10, 30, true);
 
-  printf("test-longer-simulation-time-autoregulate\n");
-  makeTest("tests/test-longer-simulation-time-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true, 28*5);
-*/  
+    printf("test-longer-simulation-time-autoregulate\n");
+    makeTest("tests/test-longer-simulation-time-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true, 28*5);
+  */
   printf("test-less-active\n");
   makeTest("tests/test-less-active.out", 10, 100, 40, 5, 30, 10, 30, true); // Adjust ad arrival time
 }
