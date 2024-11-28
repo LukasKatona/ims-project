@@ -5,6 +5,7 @@
 using namespace std;
 
 bool debugPrints = false;
+const int DEFAULT_DAYS_TO_SIMULATE = 7;
 
 // Model inputs
 double postArrivalTime = 10;
@@ -19,7 +20,7 @@ double lengthOfAddHigh = 30;
 
 bool autoregulate = true;
 
-int numberOfDaysToSimulate = 28;
+int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE;
 
 // Global objects
 Facility  User("User");
@@ -27,14 +28,14 @@ Facility  User("User");
 Histogram PostTable("Length of Posts",5,1,25);
 Histogram AddTable("Length of Adds",10,1,20);
 
-Histogram PostsPerDay("Posts per day", 0,1,numberOfDaysToSimulate);
-Histogram AddsPerDay("Adds per day", 0,1,numberOfDaysToSimulate);
+Histogram PostsPerDay("Posts seen per day", 0,1,numberOfDaysToSimulate);
+Histogram AddsPerDay("Adds seen per day", 0,1,numberOfDaysToSimulate);
 
-Histogram PostsPerHour("Posts per hour", 0,1,numberOfDaysToSimulate*24);
-Histogram AddsPerHour("Adds per hour", 0,1,numberOfDaysToSimulate*24);
+Histogram PostsPerHour("Posts seen per hour", 0,1,numberOfDaysToSimulate*24);
+Histogram AddsPerHour("Adds seen per hour", 0,1,numberOfDaysToSimulate*24);
 
-Histogram MoreThan5AddsPerDay("More than 5 adds per day", 0,1,numberOfDaysToSimulate);
-Histogram MoreThan10AddsPerDay("More than 10 adds per day", 0,1,numberOfDaysToSimulate);
+Histogram MoreThan5AddsPerDay("More than 5 adds seen per day", 0,1,numberOfDaysToSimulate);
+Histogram MoreThan10AddsPerDay("More than 10 adds seen per day", 0,1,numberOfDaysToSimulate);
 
 Stat addArrivalTimeStat("Add arrival time");
 
@@ -414,8 +415,17 @@ void makeTest(
   double lengthOfAddLow,
   double lengthOfAddHigh,
   bool autoregulate,
-  int numberOfDaysToSimulate = 28) {
-  
+  int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE) {
+    
+  // set output  isProductive = false;
+  if (system(("test -d tests/" + testOutput).c_str()) != 0) {
+    if (system(("mkdir tests/" + testOutput).c_str())) {
+      printf("Error creating tests folder\n");
+      return;
+    }
+  }
+  SetOutput(("tests/"+testOutput+"/raw.out").c_str());
+
   // set inputs
   ::postArrivalTime = postArrivalTime;
   ::addArrivalTime = addArrivalTime;
@@ -427,11 +437,6 @@ void makeTest(
   ::autoregulate = autoregulate;
 
   addArrivalTimeStat(addArrivalTime);
-
-  // set output  isProductive = false;
-  
-
-  SetOutput(testOutput.c_str());
 
   // print model description
   Print(" Model simulating user activity on social media, keeping track of how many adds user sees in comparison to posts.\n");
@@ -518,20 +523,18 @@ int main() {
     }
   }
 
-/*
   printf("test\n");
-  makeTest("tests/test.out", 10, 1000, 40, 5, 30, 10, 30, false);
+  makeTest("test", 10, 1000, 40, 5, 30, 10, 30, false);
+
   printf("test-autoregulate\n");
-  makeTest("tests/test-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true);
+  makeTest("test-autoregulate", 10, 1000, 40, 5, 30, 10, 30, true);
 
-  printf("test-small-attention-span\n");
-  makeTest("tests/test-small-attention-span.out", 10, 1000, 10, 5, 30, 10, 30, false);
-  printf("test-small-attention-span-autoregulate\n");
-  makeTest("tests/test-small-attention-span-autoregulate.out", 10, 1000, 10, 5, 30, 10, 30, true);
+  // printf("test-small-attention-span\n");
+  // makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
 
-  printf("test-longer-simulation-time-autoregulate\n");
-  makeTest("tests/test-longer-simulation-time-autoregulate.out", 10, 1000, 40, 5, 30, 10, 30, true, 28*5);
-*/  
-  printf("test-less-active\n");
-  makeTest("tests/test-less-active.out", 10, 100, 40, 5, 30, 10, 30, true); // Adjust ad arrival time
+  // printf("test-small-attention-span-autoregulate\n");
+  // makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
+
+  // printf("test-less-active\n");
+  // makeTest("test-less-active", 10, 100, 40, 5, 30, 10, 30, true, 1);
 }
