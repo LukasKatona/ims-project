@@ -17,3 +17,5 @@
 simlib/
 *.dat
 ims-proj
+
+tests/

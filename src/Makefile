@@ -13,7 +13,11 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET) $(TARGET).exe *.dat *.out ./tests/*.out
+	rm -f $(OBJS) $(TARGET) $(TARGET).exe *.dat *.out
+	rm -rf tests
 
-run: all
+run: clean all
 	./$(TARGET)
+
+plot: run
+	python3 outputParser.py
