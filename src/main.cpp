@@ -43,7 +43,7 @@ Stat AdsPerScrolling("Number of ads viewed per scrolling phase");
 int postCount = 0;
 int addCount = 0;
 
-int addCount6 = 0;
+int addFatigue = 0;
 
 int numberOfRelevantPosts = 0;
 int numberOfRelevantAdds = 0;
@@ -95,10 +95,10 @@ int getHourFromTime(int time)
 }
 
 // periodicaly decrease fatigue
-class AddFatigue6Digester : public Event {
+class AddFatigueDecrementor : public Event {
   void Behavior() {
-    if (addCount6 > 0) {
-      addCount6--;
+    if (addFatigue > 0) {
+      addFatigue--;
     }
   }
 };
@@ -159,15 +159,15 @@ public:
     Seize(User);
 
     addCount++;
-    addCount6++;
-    (new AddFatigue6Digester)->Activate(Time + (24 * 60 * 60 / 6));
+    addFatigue++;
+    (new AddFatigueDecrementor)->Activate(Time + (24 * 60 * 60 / 6));
 
-    if (addCount6 == autoregulateThreshold) {
+    if (addFatigue == autoregulateThreshold) {
       if (autoregulate) {
         addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
         addArrivalTimeStat(addArrivalTime);
       }
-      addCount6 = 0;
+      addFatigue = 0;
     }
 
     double currentAttentionSpan = Normal(attentionSpan, 5);
@@ -276,7 +276,6 @@ class DayPhaseManager : public Process
     DayPhaseManager() : Process(2) {}
   void Behavior() override
   {
-    (new UserActivityManager)->Activate();
     while (true)
     {
       // Morning Phase
@@ -404,6 +403,7 @@ void makeTest(
   (new PostGenerator)->Activate();
   (new AddGenerator)->Activate();
   (new DayPhaseManager)->Activate();
+  (new UserActivityManager)->Activate();
   (new DayStatistics)->Activate(24 * 60 * 60);
   Run();
 
@@ -429,7 +429,7 @@ void makeTest(
   // clear variables
   postCount = 0;
   addCount = 0;
-  addCount6 = 0;
+  addFatigue = 0;
   numberOfRelevantPosts = 0;
   numberOfRelevantAdds = 0;
   numberOfIrrelevantPosts = 0;
