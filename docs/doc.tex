@@ -167,9 +167,12 @@ Událost, která snižuje počet již shlédnutých reklam každých 24/6 hodin,
 \section{Testování, experimenty}
 Simualce byla spuštěna vícekrát s různými parametry, abychom sledovali stav systému za různých podmínek a ověřili hypotézy.
 
-\subsubsection{Základní test funkčnosti systému}
-Cíl testu: Ověřit, zda systém funguje správně a zda se chová podle očekávání.
-Vstupy:
+\subsection{Základní test funkčnosti systému}
+
+\subsubsection{Cíl testu}
+Ověřit, zda systém funguje správně a zda se chová podle očekávání.
+
+\subsubsection{Vstupy}
 \begin{itemize}
     \item simualční čas: 7 dní
     \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 10s
@@ -178,8 +181,8 @@ Vstupy:
     \item délka příspěvku s normálním rozdělením 15 - 20s
     \item délka reklamy s normálním rozdělením 15 - 25s
 \end{itemize}
-Výstupy:
 
+\subsubsection{Výstupy}
 Na grafu \ref{fig:Shlédnuté_příspěvky_za_hodinu} můžeme pozorovat chování systému, jak uživatel v průběhu dne mění sovji akitivitu.
 Ráno je méně aktivní, kolem poledne je vidět jak jeho aktivita stoupá, a následně opět klesá až vymizí úplně, neboť v noci uživatel spí.
 \begin{figure}[h]
@@ -189,11 +192,12 @@ Ráno je méně aktivní, kolem poledne je vidět jak jeho aktivita stoupá, a n
     \label{fig:Shlédnuté_příspěvky_za_hodinu}
 \end{figure}
 
+\newpage
 
 Co se týče přehledu celého týdne, pak na grafu \ref{fig:Shlédnuté_příspěvky_za_den} můžeme vidět, že uživatel tráví průměrerně na sociálních sítích kadždý den stejně.
 \begin{figure}[h]
     \centering
-    \includegraphics[width=\linewidth]{Shlédnuté_příspěvky_za_den.png}
+    \includegraphics[width=0.5\linewidth]{Shlédnuté_příspěvky_za_den.png}
     \caption{Shlédnutí příspěvků za den}
     \label{fig:Shlédnuté_příspěvky_za_den}
 \end{figure}
