@@ -4,19 +4,19 @@
 
 using namespace std;
 
-bool debugPrints = true;
+bool debugPrints = false;
 const int DEFAULT_DAYS_TO_SIMULATE = 28;
 
 // Model inputs
 double postArrivalTime = 10;
-double addArrivalTime = 1000;
+double adArrivalTime = 1000;
 double attentionSpan = 40;
 
-double lengthOfPostLow = 5;
-double lengthOfPostHigh = 30;
+double lengthOfPostLow = 15;
+double lengthOfPostHigh = 20;
 
-double lengthOfAddLow = 10;
-double lengthOfAddHigh = 30;
+double lengthOfAdLow = 15;
+double lengthOfAdHigh = 25;
 
 bool autoregulate = true;
 
@@ -25,37 +25,30 @@ int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE;
 // Global objects
 Facility User("User");
 
-Histogram PostTable("Length of Posts", 5, 1, 25);
-Histogram AddTable("Length of Adds", 10, 1, 20);
-
 Histogram PostsPerDay("Posts seen per day", 0,1,numberOfDaysToSimulate);
-Histogram AddsPerDay("Adds seen per day", 0,1,numberOfDaysToSimulate);
-
+Histogram AdsPerDay("Ads seen per day", 0,1,numberOfDaysToSimulate);
 Histogram PostsPerHour("Posts seen per hour", 0,1,numberOfDaysToSimulate*24);
-Histogram AddsPerHour("Adds seen per hour", 0,1,numberOfDaysToSimulate*24);
 
-Stat addArrivalTimeStat("Add arrival time");
-
-Stat PostsPerScrolling("Number of posts viewed per scrolling phase");
-Stat AdsPerScrolling("Number of ads viewed per scrolling phase");
+Stat adArrivalTimeStat("Ad arrival time");
 
 // Variables
 int postCount = 0;
-int addCount = 0;
+int adCount = 0;
+int adCountPerDay = 0;
 
-int addFatigue = 0;
+int adFatigue = 0;
 
 int numberOfRelevantPosts = 0;
-int numberOfRelevantAdds = 0;
+int numberOfRelevantAds = 0;
 
 int numberOfIrrelevantPosts = 0;
-int numberOfIrrelevantAdds = 0;
+int numberOfIrrelevantAds = 0;
 
 int numberOfSkippedPosts = 0;
-int numberOfSkippedAdds = 0;
+int numberOfSkippedAds = 0;
 
-double AddArrivalTimeUpScale = 1.6;
-double AddArrivalTimeDownScale = 0.9;
+double AdArrivalTimeUpScale = 1.6;
+double AdArrivalTimeDownScale = 0.9;
 int autoregulateThreshold = 4;
 
 int productiveLow = 30 * 60;
@@ -95,10 +88,10 @@ int getHourFromTime(int time)
 }
 
 // periodicaly decrease fatigue
-class AddFatigueDecrementor : public Event {
+class AdFatigueDecrementor : public Event {
   void Behavior() {
-    if (addFatigue > 0) {
-      addFatigue--;
+    if (adFatigue > 0) {
+      adFatigue--;
     }
   }
 };
@@ -118,7 +111,7 @@ public:
 
     postCount++;
 
-    double currentAttentionSpan = Normal(attentionSpan, 5);
+    double currentAttentionSpan = abs(Normal(attentionSpan, 5));
     if (currentAttentionSpan < lengthOfPost)
     {
       Wait(currentAttentionSpan);
@@ -139,61 +132,59 @@ public:
     }
 
     Release(User);
-    PostTable(lengthOfPost);
     PostsPerDay(getDayFromTime(Time));
     PostsPerHour(getHourFromTime(Time));
   }
 };
 
-class Add : public Process
+class Ad : public Process
 {
 public:
-  Add(int lengthOfAdd) : Process()
+  Ad(int lengthOfAd) : Process()
   {
-    this->lengthOfAdd = lengthOfAdd;
+    this->lengthOfAd = lengthOfAd;
   }
-  int lengthOfAdd;
+  int lengthOfAd;
 
   void Behavior()
   {
     Seize(User);
 
-    addCount++;
-    addFatigue++;
-    (new AddFatigueDecrementor)->Activate(Time + (24 * 60 * 60 / 6));
+    adCount++;
+    adCountPerDay++;
+    adFatigue++;
+    (new AdFatigueDecrementor)->Activate(Time + (24 * 60 * 60 / 6));
 
-    if (addFatigue == autoregulateThreshold) {
+    if (adFatigue == autoregulateThreshold) {
       if (autoregulate) {
-        addArrivalTime = addArrivalTime * AddArrivalTimeUpScale;
-        addArrivalTimeStat(addArrivalTime);
+        adArrivalTime = adArrivalTime * AdArrivalTimeUpScale;
+        adArrivalTimeStat(adArrivalTime);
       }
-      addFatigue = 0;
+      adFatigue = 0;
     }
 
-    double currentAttentionSpan = Normal(attentionSpan, 5);
-    if (currentAttentionSpan < lengthOfAdd)
+    double currentAttentionSpan = abs(Normal(attentionSpan, 5));
+    if (currentAttentionSpan < lengthOfAd)
     {
       Wait(currentAttentionSpan);
-      numberOfSkippedAdds++;
+      numberOfSkippedAds++;
     }
     else
     {
-      Wait(lengthOfAdd);
-      double probabilityOfGoodAdd = Uniform(0, 1);
-      if (probabilityOfGoodAdd > 0.44)
+      Wait(lengthOfAd);
+      double probabilityOfGoodAd = Uniform(0, 1);
+      if (probabilityOfGoodAd > 0.44)
       {
-        numberOfRelevantAdds++;
+        numberOfRelevantAds++;
       }
       else
       {
-        numberOfIrrelevantAdds++;
+        numberOfIrrelevantAds++;
       }
     }
 
     Release(User);
-    AddTable(lengthOfAdd);
-    AddsPerDay(getDayFromTime(Time));
-    AddsPerHour(getHourFromTime(Time));
+    AdsPerDay(getDayFromTime(Time));
   }
 };
 
@@ -206,26 +197,30 @@ class PostGenerator : public Event
   }
 };
 
-class AddGenerator : public Event
+class AdGenerator : public Event
 {
   void Behavior()
   {
-    (new Add(Uniform(lengthOfAddLow, lengthOfAddHigh)))->Activate();
-    Activate(Time + addArrivalTime);
+    (new Ad(Uniform(lengthOfAdLow, lengthOfAdHigh)))->Activate();
+    Activate(Time + adArrivalTime);
   }
 };
 
 // make statistics about day
-class DayStatistics : public Event
+class AdArrivalTimeRegulation : public Event
 {
   void Behavior()
   {
     if (autoregulate)
     {
-      addArrivalTime = addArrivalTime * AddArrivalTimeDownScale;
-      addArrivalTimeStat(addArrivalTime);
+      adArrivalTime = adArrivalTime * AdArrivalTimeDownScale;
+      if (adCountPerDay <= 2) {
+        adArrivalTime = adArrivalTime * AdArrivalTimeDownScale;
+      }
+      adArrivalTimeStat(adArrivalTime);
+      adCountPerDay = 0;
     }
-    DayStatistics::Activate(Time + (24 * 60 * 60));
+    AdArrivalTimeRegulation::Activate(Time + (24 * 60 * 60));
   }
 };
 
@@ -355,13 +350,14 @@ class DayPhaseManager : public Process
 void makeTest(
   string testOutput,
   double postArrivalTime,
-  double addArrivalTime,
+  double adArrivalTime,
   double attentionSpan,
   double lengthOfPostLow,
   double lengthOfPostHigh,
-  double lengthOfAddLow,
-  double lengthOfAddHigh,
+  double lengthOfAdLow,
+  double lengthOfAdHigh,
   bool autoregulate,
+  bool multiTest = false,
   int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE) {
     
   // set output file
@@ -375,36 +371,36 @@ void makeTest(
 
   // set inputs
   ::postArrivalTime = postArrivalTime;
-  ::addArrivalTime = addArrivalTime;
+  ::adArrivalTime = adArrivalTime;
   ::attentionSpan = attentionSpan;
   ::lengthOfPostLow = lengthOfPostLow;
   ::lengthOfPostHigh = lengthOfPostHigh;
-  ::lengthOfAddLow = lengthOfAddLow;
-  ::lengthOfAddHigh = lengthOfAddHigh;
+  ::lengthOfAdLow = lengthOfAdLow;
+  ::lengthOfAdHigh = lengthOfAdHigh;
   ::autoregulate = autoregulate;
 
-  addArrivalTimeStat(addArrivalTime);
+  adArrivalTimeStat(adArrivalTime);
 
   // print model description
   Print((testOutput+"\n").c_str());
   Print(" Model inputs:\n");
   Print(" - postArrivalTime: %f\n", postArrivalTime);
-  Print(" - addArrivalTime: %f\n", addArrivalTime);
+  Print(" - adArrivalTime: %f\n", adArrivalTime);
   Print(" - attentionSpan: %f\n", attentionSpan);
   Print(" - lengthOfPostLow: %f\n", lengthOfPostLow);
   Print(" - lengthOfPostHigh: %f\n", lengthOfPostHigh);
-  Print(" - lengthOfAddLow: %f\n", lengthOfAddLow);
-  Print(" - lengthOfAddHigh: %f\n", lengthOfAddHigh);
+  Print(" - lengthOfAdLow: %f\n", lengthOfAdLow);
+  Print(" - lengthOfAdHigh: %f\n", lengthOfAdHigh);
   Print(" - autoregulate: %d\n", autoregulate);
 
   // run simulation
   Init(0, numberOfDaysToSimulate * 24 * 60 * 60);
   User.Clear();
   (new PostGenerator)->Activate();
-  (new AddGenerator)->Activate();
+  (new AdGenerator)->Activate();
   (new DayPhaseManager)->Activate();
   (new UserActivityManager)->Activate();
-  (new DayStatistics)->Activate(24 * 60 * 60);
+  (new AdArrivalTimeRegulation)->Activate(24 * 60 * 60);
   Run();
 
   // print statistics
@@ -413,38 +409,34 @@ void makeTest(
   Print("Irrelevant posts: %d\n", numberOfIrrelevantPosts);
   Print("Skipped posts: %d\n", numberOfSkippedPosts);
 
-  Print("\nAdds saw: %d\n", addCount);
-  Print("Relevant adds: %d\n", numberOfRelevantAdds);
-  Print("Irrelevant adds: %d\n", numberOfIrrelevantAdds);
-  Print("Skipped adds: %d\n", numberOfSkippedAdds);
+  Print("\nAds saw: %d\n", adCount);
+  Print("Relevant ads: %d\n", numberOfRelevantAds);
+  Print("Irrelevant ads: %d\n", numberOfIrrelevantAds);
+  Print("Skipped ads: %d\n", numberOfSkippedAds);
 
-  PostTable.Output();
-  AddTable.Output();
-  PostsPerDay.Output();
-  PostsPerHour.Output();
-  AddsPerDay.Output();
-  AddsPerHour.Output();
-  addArrivalTimeStat.Output();
+  if (!multiTest) {
+    PostsPerDay.Output();
+    PostsPerHour.Output();
+  }
+  AdsPerDay.Output();
+  adArrivalTimeStat.Output();
 
   // clear variables
   postCount = 0;
-  addCount = 0;
-  addFatigue = 0;
+  adCount = 0;
+  adFatigue = 0;
   numberOfRelevantPosts = 0;
-  numberOfRelevantAdds = 0;
+  numberOfRelevantAds = 0;
   numberOfIrrelevantPosts = 0;
-  numberOfIrrelevantAdds = 0;
+  numberOfIrrelevantAds = 0;
   numberOfSkippedPosts = 0;
-  numberOfSkippedAdds = 0;
+  numberOfSkippedAds = 0;
 
   // clear statistics
-  PostTable.Clear();
-  AddTable.Clear();
   PostsPerDay.Clear();
   PostsPerHour.Clear();
-  AddsPerDay.Clear();
-  AddsPerHour.Clear();
-  addArrivalTimeStat.Clear();
+  AdsPerDay.Clear();
+  adArrivalTimeStat.Clear();
 }
 
 int main()
@@ -458,13 +450,30 @@ int main()
     }
   }
 
-  printf("test\n");
-  makeTest("test", 10, 1000, 40, 5, 30, 10, 30, false);
-  printf("test-autoregulate\n");
-  makeTest("test-autoregulate", 10, 1000, 40, 5, 30, 10, 30, true);
+  //gneral parameters
+  printf("test-with-general-parameters\n");
+  makeTest("test-with-general-parameters", 10, 1000, 40, 15, 20, 15, 25, false);
+  printf("test-with-general-parameters-autoregulate\n");
+  makeTest("test-with-general-parameters-autoregulate", 10, 1000, 40, 15, 20, 15, 25, true);
 
-  // printf("test-small-attention-span\n");
-  // makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
-  // printf("test-small-attention-span-autoregulate\n");
-  // makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
+  //post arrival time
+  for (int i = 10; i <= 120; i += 10)
+  {
+    printf("test-with-post-arrival-time: %d s\n", i);
+    makeTest("test-with-post-arrival-time-" + to_string(i), i, 1000, 40, 15, 20, 15, 25, true, true);
+  }
+
+  // user attention span
+  for (int i = 10; i <= 120; i += 10)
+  {
+    printf("test-with-attention-span: %d s\n", i);
+    makeTest("test-with-attention-span-" + to_string(i), 10, 1000, i, 15, 20, 15, 25, true, true);
+  }
+
+  // length of post
+  for (int i = 10; i <= 120; i += 5)
+  {
+    printf("test-with-length-of-post: %d s\n", i);
+    makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
+  }
 }
