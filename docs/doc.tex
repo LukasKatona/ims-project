@@ -89,10 +89,10 @@ Je proto dlůežité, si dát pozor, jak často se budou příspěvky opakovat, 
 
 \subsection{Hypotézy}
 \begin{enumerate}
-    \item Když uživatel tráví na sociální síti více času, je pravděpodobnější, že uvidí reklamu vícekrát a tedy by se měla snížit frekvence opakování, aby nedošlo k negativní reakci.
-    \item Pokud majíí uživatelé nižší dobu pozornosti, pak by se měla snížit frekvence opakování, aby nedošlo k přílišnému shlédnutí reklamy.
-    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měla zvýšit frekvence opakování rekalmy.
-    \item Frekvence opakování reklamy závisí na rychlosti přibývání nových příspěvků.na sociální síti, čím rychleji přibývají, tím více by se měla reklama sdílet.
+    \item Když uživatel tráví na sociální síti více času, je pravděpodobnější, že uvidí reklamu vícekrát a tedy by se měl snížit intervale opakování, aby nedošlo k negativní reakci.
+    \item Pokud mají uživatelé nižší dobu pozornosti, pak by se měl snížit interval opakování, aby nedošlo k přílišnému shlédnutí reklamy.
+    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měl zvýšit interval opakování rekalmy.
+    \item Interval opakování reklamy závisí na rychlosti přibývání nových příspěvků na sociální síti, čím rychleji přibývají, tím více by se měla reklama sdílet.
 \end{enumerate}
 
 \newpage
@@ -118,10 +118,10 @@ Máme sdílený zásobík pro příspěvky a reklamy, tyto jednotlivé procesy s
 
 \subsubsection{Proměnné paramtery modelu}
 Náš model obsahuje různé proměnilvé paramtery, které se budou pro jednotlivé experimenty měnit pro ověření hypotéz.
-Na základě nastavené frekvence generování nových příspěvků, doby příspěvku a doby pozornosti se budeme snažit najít optimální frekvenci pro generování reklam.
+Na základě nastavené interval generování nových příspěvků, doby příspěvku a doby pozornosti se budeme snažit najít optimální interval pro generování reklam.
 \begin{itemize}
-    \item Frekvence generování nových příspěvků
-    \item Frekvence generování reklam
+    \item Interval mezi generováním nových příspěvků
+    \item Interval mezi generováním reklam
     \item Doba příspěvku
     \item Doba pozornosti
 \end{itemize}
@@ -132,6 +132,28 @@ Na základě nastavené frekvence generování nových příspěvků, doby pří
 \vspace{1em}
 
 \subsection{Simulační model}
+Simulační model jsme imlementovali v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
+\subsubsection{Proces: DayPhaseManager}
+Proces, který řídí denní fáze uživatele, kdy je na sociálnísítí více aktivní, kdy méně a kdy vůbec. 
+Má 24 hodinový cyklus, během kterého se vystřídá několik fází, ráno, dopoledne, odpoledne, a noc, během které uživatel spí.
+Spánek je vždy dopočítám dle doby denních aktivit tak, aby uživatel vstával vždy v 6:00 a tím započal nový den.
+\subsubsection{Proces: UserActivityManager}
+Tento proces mění aktivity uživatele mezi produktivitou a časem ztráveným na sociálních sítích, přičemž doby trvání daných činností se mění na základě denní fáze.
+\subsubsection{Proces: Post (Příspěvek)}
+Post je proces, který reprezentuje jednotlivé příspěvky na sociální síti. Má svou dobu trvání, která se generuje v rozmezí obyvklé doby příspevků.
+Zároveň řeší dobu pozornosti uživatele, pokud je kratší než doba trvání příspěvku, pak uživatel příspěvek nedokouká do konce.
+Na základě přeskočení příspěvku nebo jeho dokoukání, se zaznamenává jeho relevantnost.
+\subsubsection{Proces: PostGenerator}
+Generuje nové příspěvky na sociální síti v závislosti na nastaveném intervalu, včetně jeho náhodné délky.
+\subsubsection{Proces: Ad (Reklama)}
+Reprezentuje proces reklamy, která se zobrazí uživateli. Funguje podobně jako Post, tedy řeší délku, pozornost uřivatele, ale zahrnuje navíc únavu z většího počtu reklam a případnou autoregulaci.
+\subsubsection{Proces: AdGenerator}
+Funguje téměř stejně jako PostGenerator, ale generuje reklamy na základě upravéného času pomcí autoregulace. Pokud uživatel viděl reklamu příliškrát, pak se zvýší interval jejího generování, aby ji uživatel viděl méněkrát.
+\subsubsection{Událost: AdArrivalTimeRegulation}
+Událost, která reguluje interval zobrazení reklam na základě počtu reklam, kdy každý den sníží počet reklam o jedna.
+\subsubsection{Událost: AdFatigueDecrementor}
+Událost, která snižuje počet již shlédnutých reklam každých 24/6 hodin, aby se mohly zobrazit znovu další den. Počítáme totiž 6 reklam ne za den, ale za 24 hodin od první reklamy.
+
 
 \section{Testování, experimenty}
 
