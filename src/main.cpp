@@ -464,16 +464,16 @@ int main()
   // }
 
   // user attention span
-  for (int i = 10; i <= 120; i += 10)
-  {
-    printf("test-with-attention-span: %d s\n", i);
-    makeTest("test-with-attention-span-" + to_string(i), 10, 1000, i, 15, 20, 15, 25, true, true);
-  }
+  // for (int i = 10; i <= 120; i += 10)
+  // {
+  //   printf("test-with-attention-span: %d s\n", i);
+  //   makeTest("test-with-attention-span-" + to_string(i), 10, 1000, i, 15, 20, 15, 25, true, true);
+  // }
 
   // length of post
-  // for (int i = 10; i <= 120; i += 5)
-  // {
-  //   printf("test-with-length-of-post: %d s\n", i);
-  //   makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
-  // }
+  for (int i = 25; i <= 90; i += 5)
+  {
+    printf("test-with-length-of-post: %d s\n", i);
+    makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
+  }
 }

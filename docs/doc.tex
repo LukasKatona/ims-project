@@ -90,7 +90,7 @@ Je proto dlůežité, si dát pozor, jak často se budou příspěvky opakovat, 
 \subsection{Hypotézy}
 \begin{enumerate}
     \item Pokud mají uživatelé nižší dobu pozornosti, pak by se měl snížit interval opakování, aby nedošlo k přílišnému shlédnutí reklamy.
-    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měl zvýšit interval opakování rekalmy.
+    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měl znížit interval mezi reklamami aby se sdíleli častěji.
     \item Interval opakování reklamy závisí na rychlosti přibývání nových příspěvků na sociální síti, čím rychleji přibývají, tím více by se měla reklama sdílet.
 \end{enumerate}
 
@@ -175,11 +175,11 @@ Ověřit, zda systém funguje správně a zda se chová podle očekávání.
 \subsubsection{Vstupy}
 \begin{itemize}
     \item simualční čas: 7 dní
-    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 10s
-    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 1000s
-    \item doba pozornosti uživatele: 40s
-    \item délka příspěvku s normálním rozdělením 15 - 20s
-    \item délka reklamy s normálním rozdělením 15 - 25s
+    \item interval mezi přichazejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
+    \item počátečný interval mezi přichazejícími reklamami: 1000s
+    \item doba pozornosti uživatele: normální rozdělení se střední hodnotou 40s a rozptýlením 5s
+    \item délka příspěvku: rovnoměrné rozdělení 10 - 20s
+    \item délka reklamy: rovnoměrné rozdělení 15 - 25s
 \end{itemize}
 
 \subsubsection{Výstupy}
@@ -232,11 +232,11 @@ Ověřit, zda se hypotéza 1 potvrdila, tedy zda je třeba snížit interval opa
 Simulaci spustíme vícekrát s různými délkami doby pozornosti uživatele, abychom zjistili, jak se mění interval opakování reklamy.
 \begin{itemize}
     \item simualční čas: 28 dní
-    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 10s
-    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 1000s
-    \item doba pozornosti uživatele: od 10s do 120s se skokem 10s (12 iterací testu)
-    \item délka příspěvku s normálním rozdělením 15 - 20s
-    \item délka reklamy s normálním rozdělením 15 - 25s
+    \item interval mezi přichazejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
+    \item počátečný interval mezi přichazejícími reklamami: 1000s
+    \item doba pozornosti uživatele: normální rozdělení se střední hodnotou od 10s do 120s se skokem 10s (12 iterací testu) a rozptýlením 5s
+    \item délka příspěvku: rovnoměrné rozdělení 10 - 20s
+    \item délka reklamy: rovnoměrné rozdělení 15 - 25s
 \end{itemize}
 
 \subsubsection{Výstupy}
@@ -253,6 +253,31 @@ Je vidět, že tyto dvě hodnoty nemají mezi sebou žádnou závislost, a tedy 
 \newpage
 
 \subsection{Test hypotézy 2}
+
+\subsubsection{Cíl testu}
+Ověřit, zda se hypotéza 2 potvrdila, tedy zda je třeba znížit interval mezi reklamami, pokud jsou příspěvky delší.
+\subsubsection{Vstupy}
+Simulaci spustíme vícekrát s různými délkami příspevků, abychom zjistili, jak se mění interval opakování reklamy.
+\begin{itemize}
+    \item simualční čas: 28 dní
+    \item interval mezi přichazejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
+    \item počátečný interval mezi přichazejícími reklamami: 1000s
+    \item doba pozornosti uživatele: normální rozdělení se střední hodnotou 120s a rozptýlením 5s
+    \item délka příspěvku: rovnoměrné rozdělení od 5 - 10s do 85 - 90s se skokem 5s (17 iterací testu)
+    \item délka reklamy: rovnoměrné rozdělení 15 - 25s
+\end{itemize}
+
+\subsubsection{Výstupy}
+
+Na grafu \ref{fig:post_length_vs_ad_interval} můžeme pozorovat, jak se mění interval opakování reklamy v závislosti na délce příspěvku.
+Je vidět, že tyto dvě hodnoty sou spolu závislé, a že interval opakování reklamy se znižuje s delšími příspěvky.
+hypotéza 2 je tedy potvrzena.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{post_length_vs_ad_interval.png}
+    \caption{Závislost intervalu opakování reklamy na délce příspěvku}
+    \label{fig:post_length_vs_ad_interval}
+\end{figure}
 
 \subsection{Test hypotézy 3}
 
