@@ -66,14 +66,14 @@ def plot_histogram(bins, frequencies, output_path, title, xlabel, ylabel):
 
     
 
-    if "ads seen per day" in title.lower():
-        plt.axhline(y=5, color='red', linestyle='--', label='Max 5 Ads per Day')
-        legend_labels.append('Max 5 Ads per Day')
-        plt.axhline(y=median_value, color='green', linestyle='--', label=f'Median: {median_value:.2f}')
-        legend_labels.append(f'Median: {median_value:.2f}')
-    elif "length" not in title.lower():
-        plt.axhline(y=average_value, color='orange', linestyle='--', label=f'Average: {average_value:.2f}')
-        legend_labels.append(f'Average: {average_value:.2f}')
+    if "reklamy" in title.lower():
+        plt.axhline(y=5, color='red', linestyle='--', label='Maximum 5 reklam za den')
+        legend_labels.append('Maximum 5 reklam za den')
+        plt.axhline(y=median_value, color='green', linestyle='--', label=f'Medián: {median_value:.2f}')
+        legend_labels.append(f'Medián: {median_value:.2f}')
+    else:
+        plt.axhline(y=average_value, color='orange', linestyle='--', label=f'Průměr: {average_value:.2f}')
+        legend_labels.append(f'Průměr: {average_value:.2f}')
 
 
     # If no lines are added, add a default label
@@ -115,7 +115,7 @@ def extract_and_plot_histograms(file_path):
             title = title_line.replace("|", "").replace("HISTOGRAM", "").strip()
 
             # Check if the histogram is about "day"
-            is_day_histogram = "day" in title.lower() or "hour" in title.lower()
+            is_day_histogram = "den" in title.lower() or "hodinu" in title.lower()
 
             # Parse histogram data
             bins, frequencies, _, next_index = parse_histogram_section(lines, index, is_day_histogram)
@@ -128,24 +128,14 @@ def extract_and_plot_histograms(file_path):
                 xLabel = "Bins"
                 yLabel = "Frequency"
                 if is_day_histogram:
-                    if "hour" in title.lower():
-                        xLabel = "Hour"
+                    if "hodinu" in title.lower():
+                        xLabel = "Hodina"
                     else:
-                        xLabel = "Day"
-                    if "more" in title.lower():
-                        yLabel = "Number of Occurrences"
+                        xLabel = "Den"
+                    if "reklam" in title.lower():
+                        yLabel = "Počet reklam"
                     else:
-                        if "ads" in title.lower():
-                            yLabel = "Number of Ads"
-                        else:
-                            yLabel = "Number of Posts"
-                if "length" in title.lower():
-                    xLabel = "Length (seconds)"
-                    if "ads" in title.lower():
-                        yLabel = "Number of Ads"
-                    else:
-                        yLabel = "Number of Posts"
-                
+                        yLabel = "Počet příspěvků"
 
                 plot_histogram(
                     bins,

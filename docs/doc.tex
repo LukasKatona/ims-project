@@ -7,7 +7,7 @@
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
 
 \usepackage{graphicx}
-\graphicspath{ {./} }
+\graphicspath{ {./assets} }
 
 \begin{document}
 
@@ -89,7 +89,6 @@ Je proto dlůežité, si dát pozor, jak často se budou příspěvky opakovat, 
 
 \subsection{Hypotézy}
 \begin{enumerate}
-    \item Když uživatel tráví na sociální síti více času, je pravděpodobnější, že uvidí reklamu vícekrát a tedy by se měl snížit intervale opakování, aby nedošlo k negativní reakci.
     \item Pokud mají uživatelé nižší dobu pozornosti, pak by se měl snížit interval opakování, aby nedošlo k přílišnému shlédnutí reklamy.
     \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měl zvýšit interval opakování rekalmy.
     \item Interval opakování reklamy závisí na rychlosti přibývání nových příspěvků na sociální síti, čím rychleji přibývají, tím více by se měla reklama sdílet.
@@ -126,19 +125,29 @@ Na základě nastavené interval generování nových příspěvků, doby přís
     \item Doba pozornosti
 \end{itemize}
 
+\newpage
 \subsubsection{Petriho síť}
-\vspace{1em}
-\includegraphics[width=\linewidth]{petri-net.png}
-\vspace{1em}
+\begin{figure}[h]
+    \centering
+   \includegraphics[width=\linewidth]{petri-net.png}
+    \caption{Petriho síť}
+\end{figure}
+\newpage
 
 \subsection{Simulační model}
 Simulační model jsme imlementovali v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
+
+\subsubsection{Obslužná linka: User (Uživatel)}
+Uživatel je obslužnou linkou, která zpracovává příchozí příspěvky a reklamy. Ty přicházejí do systému, kde se dostávají do fronty a čekají na zpracování uživatelem.
+Obslužnou linku si můžou zabrat i porcesy DayPhaseManager a UserActivityManager, které řídí denní fáze uživatele a jeho aktivity.
 \subsubsection{Proces: DayPhaseManager}
-Proces, který řídí denní fáze uživatele, kdy je na sociálnísítí více aktivní, kdy méně a kdy vůbec. 
-Má 24 hodinový cyklus, během kterého se vystřídá několik fází, ráno, dopoledne, odpoledne, a noc, během které uživatel spí.
+Proces, který řídí denní fáze uživatele, kdy je na sociální sítí více aktivní, kdy méně a kdy vůbec. 
+Má 24 hodinový cyklus, během kterého se vystřídá několik fází, ráno, dopoledne, odpoledne, a noc během které uživatel spí.
 Spánek je vždy dopočítám dle doby denních aktivit tak, aby uživatel vstával vždy v 6:00 a tím započal nový den.
+Má vyšší prioritu než příspěvky, reklamy a UserActivityManager.
 \subsubsection{Proces: UserActivityManager}
 Tento proces mění aktivity uživatele mezi produktivitou a časem ztráveným na sociálních sítích, přičemž doby trvání daných činností se mění na základě denní fáze.
+Má vyšší prioritu než příspěvky a reklamy. 
 \subsubsection{Proces: Post (Příspěvek)}
 Post je proces, který reprezentuje jednotlivé příspěvky na sociální síti. Má svou dobu trvání, která se generuje v rozmezí obyvklé doby příspevků.
 Zároveň řeší dobu pozornosti uživatele, pokud je kratší než doba trvání příspěvku, pak uživatel příspěvek nedokouká do konce.
@@ -156,8 +165,67 @@ Událost, která snižuje počet již shlédnutých reklam každých 24/6 hodin,
 
 
 \section{Testování, experimenty}
+Simualce byla spuštěna vícekrát s různými parametry, abychom sledovali stav systému za různých podmínek a ověřili hypotézy.
+
+\subsubsection{Základní test funkčnosti systému}
+Cíl testu: Ověřit, zda systém funguje správně a zda se chová podle očekávání.
+Vstupy:
+\begin{itemize}
+    \item simualční čas: 7 dní
+    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 10s
+    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 1000s
+    \item doba pozornosti uživatele: 40s
+    \item délka příspěvku s normálním rozdělením 15 - 20s
+    \item délka reklamy s normálním rozdělením 15 - 25s
+\end{itemize}
+Výstupy:
+
+Na grafu \ref{fig:Shlédnuté_příspěvky_za_hodinu} můžeme pozorovat chování systému, jak uživatel v průběhu dne mění sovji akitivitu.
+Ráno je méně aktivní, kolem poledne je vidět jak jeho aktivita stoupá, a následně opět klesá až vymizí úplně, neboť v noci uživatel spí.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{Shlédnuté_příspěvky_za_hodinu.png}
+    \caption{Shlédnutí příspěvků za hodinu}
+    \label{fig:Shlédnuté_příspěvky_za_hodinu}
+\end{figure}
 
 
+Co se týče přehledu celého týdne, pak na grafu \ref{fig:Shlédnuté_příspěvky_za_den} můžeme vidět, že uživatel tráví průměrerně na sociálních sítích kadždý den stejně.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{Shlédnuté_příspěvky_za_den.png}
+    \caption{Shlédnutí příspěvků za den}
+    \label{fig:Shlédnuté_příspěvky_za_den}
+\end{figure}
+
+
+Na grafech \ref{fig:Shlédnuté_reklamy_za_den} a \ref{fig:Shlédnuté_reklamy_za_den_auto} je vidět, jak se chová systém s autoregulací reklam.
+Pokud je vypnutá, pak reklam uživatel vidí příliš mnoho. Pokud je zapnutá, pak se počet reklam snižuje a uživatel je vidí méněkrát.
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Shlédnuté_reklamy_za_den.png}
+        \caption{Shlédnutí reklam bez autoregulace}
+        \label{fig:Shlédnuté_reklamy_za_den}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Shlédnuté_reklamy_za_den_auto.png}
+        \caption{Shlédnutí reklam s autoregulací}
+        \label{fig:Shlédnuté_reklamy_za_den_auto}
+    \end{minipage}
+\end{figure}
+\newpage
+
+
+\subsubsection{Test hypotézy 1}
+
+
+\subsubsection{Test hypotézy 2}
+
+\subsubsection{Test hypotézy 3}
 
 \section{Závěr}
 

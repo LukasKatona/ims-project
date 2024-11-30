@@ -5,7 +5,7 @@
 using namespace std;
 
 bool debugPrints = false;
-const int DEFAULT_DAYS_TO_SIMULATE = 28;
+const int DEFAULT_DAYS_TO_SIMULATE = 1;
 
 // Model inputs
 double postArrivalTime = 10;
@@ -25,11 +25,11 @@ int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE;
 // Global objects
 Facility User("User");
 
-Histogram PostsPerDay("Posts seen per day", 0,1,numberOfDaysToSimulate);
-Histogram AdsPerDay("Ads seen per day", 0,1,numberOfDaysToSimulate);
-Histogram PostsPerHour("Posts seen per hour", 0,1,numberOfDaysToSimulate*24);
+Histogram PostsPerDay("Shlédnuté příspěvky za den", 0,1,numberOfDaysToSimulate);
+Histogram AdsPerDay("Shlédnuté reklamy za den", 0,1,numberOfDaysToSimulate);
+Histogram PostsPerHour("Shlédnuté příspěvky za hodinu", 0,1,numberOfDaysToSimulate*24);
 
-Stat adArrivalTimeStat("Ad arrival time");
+Stat adArrivalTimeStat("Čas mezi příchody reklam");
 
 // Variables
 int postCount = 0;
@@ -455,7 +455,7 @@ int main()
   makeTest("test-with-general-parameters", 10, 1000, 40, 15, 20, 15, 25, false);
   printf("test-with-general-parameters-autoregulate\n");
   makeTest("test-with-general-parameters-autoregulate", 10, 1000, 40, 15, 20, 15, 25, true);
-
+/*
   //post arrival time
   for (int i = 10; i <= 120; i += 10)
   {
@@ -475,5 +475,5 @@ int main()
   {
     printf("test-with-length-of-post: %d s\n", i);
     makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
-  }
+  }*/
 }
