@@ -5,7 +5,7 @@
 using namespace std;
 
 bool debugPrints = false;
-const int DEFAULT_DAYS_TO_SIMULATE = 1;
+const int DEFAULT_DAYS_TO_SIMULATE = 28;
 
 // Model inputs
 double postArrivalTime = 10;
@@ -451,17 +451,17 @@ int main()
   }
 
   //gneral parameters
-  printf("test-with-general-parameters\n");
-  makeTest("test-with-general-parameters", 10, 1000, 40, 15, 20, 15, 25, false);
-  printf("test-with-general-parameters-autoregulate\n");
-  makeTest("test-with-general-parameters-autoregulate", 10, 1000, 40, 15, 20, 15, 25, true);
-/*
+  // printf("test-with-general-parameters\n");
+  // makeTest("test-with-general-parameters", 10, 1000, 40, 15, 20, 15, 25, false);
+  // printf("test-with-general-parameters-autoregulate\n");
+  // makeTest("test-with-general-parameters-autoregulate", 10, 1000, 40, 15, 20, 15, 25, true);
+
   //post arrival time
-  for (int i = 10; i <= 120; i += 10)
-  {
-    printf("test-with-post-arrival-time: %d s\n", i);
-    makeTest("test-with-post-arrival-time-" + to_string(i), i, 1000, 40, 15, 20, 15, 25, true, true);
-  }
+  // for (int i = 10; i <= 120; i += 10)
+  // {
+  //   printf("test-with-post-arrival-time: %d s\n", i);
+  //   makeTest("test-with-post-arrival-time-" + to_string(i), i, 1000, 40, 15, 20, 15, 25, true, true);
+  // }
 
   // user attention span
   for (int i = 10; i <= 120; i += 10)
@@ -471,9 +471,9 @@ int main()
   }
 
   // length of post
-  for (int i = 10; i <= 120; i += 5)
-  {
-    printf("test-with-length-of-post: %d s\n", i);
-    makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
-  }*/
+  // for (int i = 10; i <= 120; i += 5)
+  // {
+  //   printf("test-with-length-of-post: %d s\n", i);
+  //   makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
+  // }
 }

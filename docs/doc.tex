@@ -224,12 +224,37 @@ Pokud je vypnutá, pak reklam uživatel vidí příliš mnoho. Pokud je zapnutá
 \newpage
 
 
-\subsubsection{Test hypotézy 1}
+\subsection{Test hypotézy 1}
 
+\subsubsection{Cíl testu}
+Ověřit, zda se hypotéza 1 potvrdila, tedy zda je třeba snížit interval opakování reklamy, pokud mají uživatelé nižší dobu pozornosti.
+\subsubsection{Vstupy}
+Simulaci spustíme vícekrát s různými délkami doby pozornosti uživatele, abychom zjistili, jak se mění interval opakování reklamy.
+\begin{itemize}
+    \item simualční čas: 28 dní
+    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 10s
+    \item interval mezi přichazejícími příspěvky s exponenciálním rozdělením se střední hodnotou 1000s
+    \item doba pozornosti uživatele: od 10s do 120s se skokem 10s (12 iterací testu)
+    \item délka příspěvku s normálním rozdělením 15 - 20s
+    \item délka reklamy s normálním rozdělením 15 - 25s
+\end{itemize}
 
-\subsubsection{Test hypotézy 2}
+\subsubsection{Výstupy}
 
-\subsubsection{Test hypotézy 3}
+Na grafu \ref{fig:attention_time_vs_ad_interval} můžeme pozorovat, jak se mění interval opakování reklamy v závislosti na době pozornosti uživatele.
+Je vidět, že tyto dvě hodnoty nemají mezi sebou žádnou závislost, a tedy hypotéza 1 byla vyvrácena.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{attention_time_vs_ad_interval.png}
+    \caption{Závislost intervalu opakování reklamy na době pozornosti uživatele}
+    \label{fig:attention_time_vs_ad_interval}
+\end{figure}
+
+\newpage
+
+\subsection{Test hypotézy 2}
+
+\subsection{Test hypotézy 3}
 
 \section{Závěr}
 
