@@ -28,7 +28,7 @@
 
 \section{Úvod}
 
-Cílém této studie je analyzovat sledování příspěvků na sociálních sítích a efektivita reklam na nich.
+Cílém této studie je analyzovat sledování příspěvků a reklam na sociálních sítích.
 Různé skupiny lidí mají různé preference a zájmy, a proto se může stát,
 že některé příspěvky nebudou dostatečně sledovány. Cílem je zjistit,
 jakým způsobem se šíří informace a jakým způsobem se může zvýšit sledovanost reklam. 
@@ -183,23 +183,42 @@ Ověřit, zda systém funguje správně a zda se chová podle očekávání.
 \end{itemize}
 
 \subsubsection{Výstupy}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c}
+        \hline
+        & Shlédnuté př. & Relevantní př. & Irrelevantní př. & Shlédnuté re. & Relevantní re. & Irrelevantní re. \\
+        \hline
+        Bez autoregulace & 5673 & 3198 & 2475 & 58 & 29 & 29 \\
+        S autoregulací & 5453 & 3030 & 2423 & 40 & 26 & 14 \\
+        \hline
+    \end{tabular}
+    \caption{Výstupy bez a s autoregulací}
+    \label{tab:autoregulace}
+\end{table}
+
+5673 shlédnutých příspěvků za týden činí při průměrné délce příspěvku 15s, přibližně 3,3 hodin denně aktivního času na sociálních sítích.
+
+
+Co se týče přehledu celého týdne, pak na grafu \ref{fig:Shlédnuté_příspěvky_za_den} můžeme vidět, že uživatel tráví průměrerně na sociálních sítích kadždý den stejně.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\linewidth]{Shlédnuté_příspěvky_za_den.png}
+    \caption{Shlédnutí příspěvků za den}
+    \label{fig:Shlédnuté_příspěvky_za_den}
+\end{figure}
+
+\newpage
 Na grafu \ref{fig:Shlédnuté_příspěvky_za_hodinu} můžeme pozorovat chování systému, jak uživatel v průběhu dne mění sovji akitivitu.
 Ráno je méně aktivní, kolem poledne je vidět jak jeho aktivita stoupá, a následně opět klesá až vymizí úplně, neboť v noci uživatel spí.
+
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{Shlédnuté_příspěvky_za_hodinu.png}
     \caption{Shlédnutí příspěvků za hodinu}
     \label{fig:Shlédnuté_příspěvky_za_hodinu}
-\end{figure}
-
-\newpage
-
-Co se týče přehledu celého týdne, pak na grafu \ref{fig:Shlédnuté_příspěvky_za_den} můžeme vidět, že uživatel tráví průměrerně na sociálních sítích kadždý den stejně.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.5\linewidth]{Shlédnuté_příspěvky_za_den.png}
-    \caption{Shlédnutí příspěvků za den}
-    \label{fig:Shlédnuté_příspěvky_za_den}
 \end{figure}
 
 
@@ -270,7 +289,7 @@ Simulaci spustíme vícekrát s různými délkami příspevků, abychom zjistil
 \subsubsection{Výstupy}
 
 Na grafu \ref{fig:post_length_vs_ad_interval} můžeme pozorovat, jak se mění interval opakování reklamy v závislosti na délce příspěvku.
-Je vidět, že tyto dvě hodnoty sou spolu závislé, a že interval opakování reklamy se znižuje s delšími příspěvky.
+Je vidět, že tyto dvě hodnoty sou spolu závislé, a že interval se snižuje s delšími příspěvky.
 hypotéza 2 je tedy potvrzena.
 \begin{figure}[h]
     \centering
@@ -278,6 +297,7 @@ hypotéza 2 je tedy potvrzena.
     \caption{Závislost intervalu opakování reklamy na délce příspěvku}
     \label{fig:post_length_vs_ad_interval}
 \end{figure}
+\newpage
 
 \subsection{Test hypotézy 3}
 \subsubsection{Cíl testu}
@@ -301,8 +321,10 @@ Na grafu \ref{fig:post_arrival_time_vs_ad_interval} vidíme, že s rostoucím po
     \caption{Závislost mezi intervalem přidámí příspevků a intervalem mezi reklamami}
     \label{fig:post_arrival_time_vs_ad_interval}
 \end{figure}
+\newpage
 
 \section{Závěr}
+
 
 \bibliographystyle{czechiso}
 \bibliography{reference}
