@@ -34,6 +34,7 @@ Stat adArrivalTimeStat("Ad arrival time");
 // Variables
 int postCount = 0;
 int adCount = 0;
+int adCountPerDay = 0;
 
 int adFatigue = 0;
 
@@ -150,6 +151,7 @@ public:
     Seize(User);
 
     adCount++;
+    adCountPerDay++;
     adFatigue++;
     (new AdFatigueDecrementor)->Activate(Time + (24 * 60 * 60 / 6));
 
@@ -212,7 +214,11 @@ class AdArrivalTimeRegulation : public Event
     if (autoregulate)
     {
       adArrivalTime = adArrivalTime * AdArrivalTimeDownScale;
+      if (adCountPerDay <= 2) {
+        adArrivalTime = adArrivalTime * AdArrivalTimeDownScale;
+      }
       adArrivalTimeStat(adArrivalTime);
+      adCountPerDay = 0;
     }
     AdArrivalTimeRegulation::Activate(Time + (24 * 60 * 60));
   }
