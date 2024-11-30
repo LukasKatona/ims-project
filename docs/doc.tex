@@ -28,24 +28,23 @@
 
 \section{Úvod}
 
-Cílém této studie je analyzovat sledování příspěvků a reklam na sociálních sítích.
+Cílem této studie je analyzovat sledování příspěvků a reklam na sociálních sítích.
 Různé skupiny lidí mají různé preference a zájmy, a proto se může stát,
 že některé příspěvky nebudou dostatečně sledovány. Cílem je zjistit,
 jakým způsobem se šíří informace a jakým způsobem se může zvýšit sledovanost reklam. 
 Poznatky o šíření příspěvků mohou být využity pro zlepšení marketingových strategií.
 
-
-Chtěli bychom sledovat, jak často sdílet a opakovat konkrétntí reklamu vzhledem rychlosti přibývajícíh, nových příspěvků na sociální síti
+Chtěli bychom sledovat, jak často sdílet a opakovat konkrétní reklamu vzhledem rychlosti přibývajících, nových příspěvků na sociální síti
 (poměr mezi reklamou a ostatními příspěvky), délkou příspěvků, časem zveřejnění a délkou doby pozornosti uživatelů.
 
 \subsection{Co chceme sledovat:}
 \begin{itemize}
     \item Kolik lidí dokouká příspěvek do konce
     \begin{itemize}
-        \item Různé věkové kategorie idí mají jinou dobu pozornosti, proto délka příspěvku hraje roli v tom, jak je daný příspěvěk sledován.
-        \item Optimalizací délky příspěšku můžeme zvýšit sledovanost.
+        \item Různé věkové kategorie lidí mají jinou dobu pozornosti, proto délka příspěvku hraje roli v tom, jak je daný příspěvek sledován.
+        \item Optimalizací délky příspěvku můžeme zvýšit sledovanost.
     \end{itemize}
-    \item Jaká je optimální délka příspěvu pro různé věkové skupiny
+    \item Jaká je optimální délka příspěvku pro různé věkové skupiny
     \begin{itemize}
         \item V případě že uživatel nedokouká až do konce, pak nás zajímá, kolik procent příspěvku dokouká.
         \item Nejdůležitější informace by měly být na začátku příspěvku, aby je vidělo co nejvíce uživatelů.
@@ -53,7 +52,7 @@ Chtěli bychom sledovat, jak často sdílet a opakovat konkrétntí reklamu vzhl
     \item Kolikrát uživatel vidí reklamu
     \begin{itemize}
         \item Pokud uživatel vidí danou reklamu málokrát, pak na ni nemusí reagovat.
-        \item Přílišené opakování reklamy však může taktéž vést k negativní reakci.
+        \item Přílišné opakování reklamy však může taktéž vést k negativní reakci.
     \end{itemize}
     \item Čas zveřejnění příspěvku 
     \begin{itemize}
@@ -61,9 +60,9 @@ Chtěli bychom sledovat, jak často sdílet a opakovat konkrétntí reklamu vzhl
         \item Pokud je příspěvek zveřejněn v době, kdy je uživatel online, pak je pravděpodobnější, že ho uvidí.
     \end{itemize}
 \end{itemize}
-% TODO k comu sme dospeli
-% ako sme vysledky overovali
-
+K výsledkům jsme se dopracovali sestrojím simulačního modelu jednoho uživatele sociální sítě. Sestrojený model považujeme za validní, pokud se bude chovat tak jako běžní uživatelé sociálních sítí jako my a lidé v našem okolí. 
+Validitu modelu jsme potvrdili testem \ref{test-basic}.
+Pokud je model validní, pak můžeme předpokládat, že výsledky ním získané budou platné.
 \newpage
 \section{Fakta}
 
@@ -73,50 +72,50 @@ pro zjednodušení simulace budeme však používat průměrné hodnoty těchto 
 Tento čas zároveň koreluje s naší vlastní zkušeností, kdy většina lidí bývá online.
 
 \subsection{Délka příspěvku}
-Délka příspěvku by měla záviset na schopnpsti lidí udržet pozornost. Záleží na co tito lidé upínají svoji pozornost,
-naříklad, na práci se lidé soustředí déle než na sociální sítě, proto bylo náročené najít jednoznačné a konkrétní číslo.
+Délka příspěvku by měla záviset na schopnosti lidí udržet pozornost. Záleží, na co tito lidé upínají svoji pozornost,
+například, na práci se lidé soustředí déle než na sociální sítě, proto bylo náročné najít jednoznačné a konkrétní číslo.
 Proto jsme hledali na více zdrojích a tato čísla zprůměrovali na základě našich vlastních zkušeností.
 
 Podle \cite{AttentionSpan1}, starší lidé, přibližně nad 50 roků, mají průměrnou dobu pozornosti 2,5 minuty, zatímco lidé v produktivním věku mají pozornost již sníženou, a to na 40-75 sekund.
 Na základě výzkumu \cite{AttentionSpan2}, mají děti pozornost ještě nižší, pouze 2-8 sekund.
 
 \subsection{Opakování příspěvku a jejich sledovanost}
-Tento bod je primárně důležitý z hleidska marketingu, aby se nestalo, že se reklamy stanou příliš otravnými.
-Podle statustik \cite{SocialMediaAds}, pokud uživatel viděl danou reklamu 11krát a vícekrát, pak je o 10\% pravděpodobnější že na ni bude regovat negativně.
-Navíc, pouze 44\% uživatelů dle \cite{SocialMediaAds-44} vidí nerelevantí reklamy. 
+Tento bod je primárně důležitý z hlediska marketingu, aby se nestalo, že se reklamy stanou příliš otravnými.
+Podle statistik \cite{SocialMediaAds}, pokud uživatel viděl danou reklamu 11krát a vícekrát, pak je o 10\% pravděpodobnější že na ni bude reagovat negativně.
+Navíc, pouze 44\% uživatelů dle \cite{SocialMediaAds-44} vidí nerelevantní reklamy. 
 
-Je proto dlůežité, si dát pozor, jak často se budou příspěvky opakovat, aby nebyly otravné, ale zároveň aby byly dostatečně viděny.
+Je proto důležité, si dát pozor, jak často se budou příspěvky opakovat, aby nebyly otravné, ale zároveň aby byly dostatečně viděny.
 
 \subsection{Hypotézy}
 \begin{enumerate}
     \item Pokud mají uživatelé nižší dobu pozornosti, pak by se měl snížit interval opakování, aby nedošlo k přílišnému shlédnutí reklamy.
-    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měl znížit interval mezi reklamami aby se sdíleli častěji.
+    \item Pokud jsou příspěvky delší, pak jich uživatel uvidí za den méně, proto by se měl snížit interval mezi reklamami, aby se sdíleli častěji.
     \item Interval opakování reklamy závisí na rychlosti přibývání nových příspěvků na sociální síti, čím rychleji přibývají, tím více by se měla reklama sdílet.
 \end{enumerate}
 
 \newpage
 \section{Koncepce, způsob řešení}
-Na ověření hypotéz jsme se rozhodli využít systém hromadné obsuhy, kde uživatel je linkou, která zpracovává příspěvky a reklamy (procesy).
-Pro zakreslení konceptuiálního modelu jsme se rozhodli pro využití Petriho sítě. Simulační model jsme se rozdholdi na programovat v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
+Na ověření hypotéz jsme se rozhodli využít systém hromadné obsluhy, kde uživatel je linkou, která zpracovává příspěvky a reklamy (procesy).
+Pro zakreslení konceptuálního modelu jsme se rozhodli pro využití Petriho sítě. Simulační model jsme se rozhodli na programovat v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
 \subsection{Konceptuální model}
 Uživatel je obslužnou linkou, která zpracovává příchozí příspěvky a reklamy. Ty přicházejí do systému, kde se dostávají na zásobník,
-to znamená že novější příspěvky mají priotiu a může se stát že k některým příspěvkům uživatel ani nedojde.
-Pokud příspěvěk trvá déle, jako je doba pozornosti uživatele, pak jej uživatel nedokouká do konce a příspěvek opouští systém.
+to znamená že novější příspěvky mají prioritu a může se stát že k některým příspěvkům uživatel ani nedojde.
+Pokud příspěvek trvá déle, jako je doba pozornosti uživatele, pak jej uživatel nedokouká do konce a příspěvek opouští systém.
 Pokud jej ale dokouká dokonce, tak stále záleží na jeho relevanci, zda uživatele zaujal a na něj uživatel reaguje, v ten moment příspěvek opouští systém jako relevantní nebo ne.
-Dále je také v případě reklamy sledováno, kolkrát ji uživatel za den viděl.
-Pokud to bylo příliškrát, pak se o tom vytváří záznam.
+Dále je také v případě reklamy sledováno, kolikrát ji uživatel za den viděl.
+Pokud to bylo příliš krát, pak se o tom vytváří záznam.
 
 Uživatel má také svou dobu, kdy je online, nejaktivnější je mezi 9:00 - 12:00, jinak je méně aktivní, nebo není aktivní vůbec, například když spí.
-Jeho aktiviu ovlivňuje běžné denní aktivity, jako je práce, škola, nebo volný čas. Když je člověk aktivnější, pak na sociální síti tráví delší dobu a přestávky jsou kratší.
-Pokud je uživatel méně aktivní je jeho doba na sociální stíti kratší a přestávky jsou delší. Pokud uživatel spí, pak je offline a neodebírá žádně příspěvky.
+Jeho aktivitu ovlivňuje běžné denní aktivity, jako je práce, škola, nebo volný čas. Když je člověk aktivnější, pak na sociální síti tráví delší dobu a přestávky jsou kratší.
+Pokud je uživatel méně aktivní je jeho doba na sociální síti kratší a přestávky jsou delší. Pokud uživatel spí, pak je offline a neodebírá žádné příspěvky.
 
 Pro zjednodušení zanedbáváme různé dny v týdnu, kdy se může chování uživatele lišit. Taktéž, když se naplní počítalo reklam za den, tak jej resetujeme,
 což znamená že uživatel může vidět reklamu znovu další den.
 %V našem modelu existuje pouze jeden zásobník pro příspěvky, který je sdílený.
-Máme sdílený zásobík pro příspěvky a reklamy, tyto jednotlivé procesy si v sobě nesou informaci o svém typu, který ovlivňuje chování systému.
+Máme sdílený zásobník pro příspěvky a reklamy, tyto jednotlivé procesy si v sobě nesou informaci o svém typu, který ovlivňuje chování systému.
 
-\subsubsection{Proměnné paramtery modelu}
-Náš model obsahuje různé proměnilvé paramtery, které se budou pro jednotlivé experimenty měnit pro ověření hypotéz.
+\subsubsection{Proměnné parametry modelu}
+Náš model obsahuje různé proměnlivé parametry, které se budou pro jednotlivé experimenty měnit pro ověření hypotéz.
 Na základě nastavené interval generování nových příspěvků, doby příspěvku a doby pozornosti se budeme snažit najít optimální interval pro generování reklam.
 \begin{itemize}
     \item Interval mezi generováním nových příspěvků
@@ -135,39 +134,38 @@ Na základě nastavené interval generování nových příspěvků, doby přís
 \newpage
 
 \subsection{Simulační model}
-Simulační model jsme imlementovali v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
+Simulační model jsme implementovali v jazyce C++ s využitím knihovny SIMLIB\footnote{\href{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}{https://www.fit.vut.cz/person/peringer/public/SIMLIB/}}.
 
 \subsubsection{Obslužná linka: User (Uživatel)}
 Uživatel je obslužnou linkou, která zpracovává příchozí příspěvky a reklamy. Ty přicházejí do systému, kde se dostávají do fronty a čekají na zpracování uživatelem.
-Obslužnou linku si můžou zabrat i porcesy DayPhaseManager a UserActivityManager, které řídí denní fáze uživatele a jeho aktivity.
+Obslužnou linku si můžou zabrat i procesy DayPhaseManager a UserActivityManager, které řídí denní fáze uživatele a jeho aktivity.
 \subsubsection{Proces: DayPhaseManager}
 Proces, který řídí denní fáze uživatele, kdy je na sociální sítí více aktivní, kdy méně a kdy vůbec. 
-Má 24 hodinový cyklus, během kterého se vystřídá několik fází, ráno, dopoledne, odpoledne, a noc během které uživatel spí.
+Má 24hodinový cyklus, během kterého se vystřídá několik fází, ráno, dopoledne, odpoledne, a noc během které uživatel spí.
 Spánek je vždy dopočítám dle doby denních aktivit tak, aby uživatel vstával vždy v 6:00 a tím započal nový den.
 Má vyšší prioritu než příspěvky, reklamy a UserActivityManager.
 \subsubsection{Proces: UserActivityManager}
-Tento proces mění aktivity uživatele mezi produktivitou a časem ztráveným na sociálních sítích, přičemž doby trvání daných činností se mění na základě denní fáze.
+Tento proces mění aktivity uživatele mezi produktivitou a časem stráveným na sociálních sítích, přičemž doby trvání daných činností se mění na základě denní fáze.
 Má vyšší prioritu než příspěvky a reklamy. 
 \subsubsection{Proces: Post (Příspěvek)}
-Post je proces, který reprezentuje jednotlivé příspěvky na sociální síti. Má svou dobu trvání, která se generuje v rozmezí obyvklé doby příspevků.
+Post je proces, který reprezentuje jednotlivé příspěvky na sociální síti. Má svou dobu trvání, která se generuje v rozmezí obvyklé doby příspěvků.
 Zároveň řeší dobu pozornosti uživatele, pokud je kratší než doba trvání příspěvku, pak uživatel příspěvek nedokouká do konce.
 Na základě přeskočení příspěvku nebo jeho dokoukání, se zaznamenává jeho relevantnost.
 \subsubsection{Proces: PostGenerator}
 Generuje nové příspěvky na sociální síti v závislosti na nastaveném intervalu, včetně jeho náhodné délky.
 \subsubsection{Proces: Ad (Reklama)}
-Reprezentuje proces reklamy, která se zobrazí uživateli. Funguje podobně jako Post, tedy řeší délku, pozornost uřivatele, ale zahrnuje navíc únavu z většího počtu reklam a případnou autoregulaci.
+Reprezentuje proces reklamy, která se zobrazí uživateli. Funguje podobně jako Post, tedy řeší délku, pozornost uživatele, ale zahrnuje navíc únavu z většího počtu reklam a případnou autoregulaci.
 \subsubsection{Proces: AdGenerator}
-Funguje téměř stejně jako PostGenerator, ale generuje reklamy na základě upravéného času pomcí autoregulace. Pokud uživatel viděl reklamu příliškrát, pak se zvýší interval jejího generování, aby ji uživatel viděl méněkrát.
+Funguje téměř stejně jako PostGenerator, ale generuje reklamy na základě upraveného času pomocí autoregulace. Pokud uživatel viděl reklamu příliš krát, pak se zvýší interval jejího generování, aby ji uživatel viděl méněkrát.
 \subsubsection{Událost: AdArrivalTimeRegulation}
 Událost, která reguluje interval zobrazení reklam na základě počtu reklam, kdy každý den sníží počet reklam o jedna.
 \subsubsection{Událost: AdFatigueDecrementor}
 Událost, která snižuje počet již shlédnutých reklam každých 24/6 hodin, aby se mohly zobrazit znovu další den. Počítáme totiž 6 reklam ne za den, ale za 24 hodin od první reklamy.
 
-
 \section{Testování, experimenty}
-Simualce byla spuštěna vícekrát s různými parametry, abychom sledovali stav systému za různých podmínek a ověřili hypotézy.
+Simulace byla spuštěna vícekrát s různými parametry, abychom sledovali stav systému za různých podmínek a ověřili hypotézy.
 
-\subsection{Základní test funkčnosti systému}
+\subsection{Základní test funkčnosti systému} \label{test-basic}
 
 \subsubsection{Cíl testu}
 Ověřit, zda systém funguje správně a zda se chová podle očekávání.
@@ -175,8 +173,8 @@ Ověřit, zda systém funguje správně a zda se chová podle očekávání.
 \subsubsection{Vstupy}
 \begin{itemize}
     \item simualční čas: 7 dní
-    \item interval mezi přichazejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
-    \item počátečný interval mezi přichazejícími reklamami: 1000s
+    \item interval mezi přicházejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
+    \item počátečný interval mezi přicházejícími reklamami: 1000s
     \item doba pozornosti uživatele: normální rozdělení se střední hodnotou 40s a rozptýlením 5s
     \item délka příspěvku: rovnoměrné rozdělení 10 - 20s
     \item délka reklamy: rovnoměrné rozdělení 15 - 25s
@@ -201,7 +199,7 @@ Ověřit, zda systém funguje správně a zda se chová podle očekávání.
 
 5673 shlédnutých příspěvků za týden činí při průměrné délce příspěvku 15s, přibližně 3,3 hodin denně aktivního času na sociálních sítích.
 
-Na grafu \ref{fig:Shlédnuté_příspěvky_za_den}, který zobrazuje přehledu celého týdne, můžeme vidět, že uživatel tráví průměrerně na sociálních sítích kadždý den stejně.
+Na grafu \ref{fig:Shlédnuté_příspěvky_za_den}, který zobrazuje přehledu celého týdne, můžeme vidět, že uživatel tráví průměrně na sociálních sítích každý den stejně.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{Shlédnuté_příspěvky_za_den.png}
@@ -210,9 +208,8 @@ Na grafu \ref{fig:Shlédnuté_příspěvky_za_den}, který zobrazuje přehledu c
 \end{figure}
 
 \newpage
-Na grafu \ref{fig:Shlédnuté_příspěvky_za_hodinu} můžeme naopak pozorovat chování systému, jak uživatel v průběhu dne mění svoji akitivitu.
-Ráno je méně aktivní, kolem poledne je vidět jak jeho aktivita stoupá, a následně opět klesá až vymizí úplně, neboť v noci uživatel spí.
-
+Na grafu \ref{fig:Shlédnuté_příspěvky_za_hodinu} můžeme naopak pozorovat chování systému, jak uživatel v průběhu dne mění svoji aktivitu.
+Ráno je méně aktivní, kolem poledne je vidět, jak jeho aktivita stoupá, a následně opět klesá až vymizí úplně, neboť v noci uživatel spí.
 
 \begin{figure}[h]
     \centering
@@ -220,7 +217,6 @@ Ráno je méně aktivní, kolem poledne je vidět jak jeho aktivita stoupá, a n
     \caption{Shlédnutí příspěvků za hodinu}
     \label{fig:Shlédnuté_příspěvky_za_hodinu}
 \end{figure}
-
 
 Na grafech \ref{fig:Shlédnuté_reklamy_za_den} a \ref{fig:Shlédnuté_reklamy_za_den_auto} je vidět, jak se chová systém s autoregulací reklam.
 Pokud je vypnutá, pak reklam uživatel vidí příliš mnoho. Pokud je zapnutá, pak se počet reklam snižuje a uživatel je vidí méněkrát.
@@ -240,8 +236,12 @@ Pokud je vypnutá, pak reklam uživatel vidí příliš mnoho. Pokud je zapnutá
         \label{fig:Shlédnuté_reklamy_za_den_auto}
     \end{minipage}
 \end{figure}
-\newpage
 
+\subsubsection{Zhodnocení}
+Z výsledných grafů vidíme, že aktivita uživatele v našem simulačním modelu, vypadá věruhodně a odpovídá našim očekáváním.
+Průměrná doba strávená na sociální síti taktéž odpovídá realitě. Můžeme proto předpokládat, že náš model je validní a můžeme pokračovat v testování hypotéz.
+
+\newpage
 
 \subsection{Test hypotézy 1}
 
@@ -251,8 +251,8 @@ Ověřit, zda se hypotéza 1 potvrdila, tedy zda je třeba snížit interval opa
 Simulaci spustíme vícekrát s různými délkami doby pozornosti uživatele, abychom zjistili, jak se mění interval opakování reklamy.
 \begin{itemize}
     \item simualční čas: 28 dní
-    \item interval mezi přichazejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
-    \item počáteční interval mezi přichazejícími reklamami: 1000s
+    \item interval mezi přicházejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
+    \item počáteční interval mezi přicházejícími reklamami: 1000s
     \item doba pozornosti uživatele: normální rozdělení se střední hodnotou od 10s do 120s se skokem 10s (12 iterací testu) a rozptýlením 5s
     \item délka příspěvku: rovnoměrné rozdělení 10 - 20s
     \item délka reklamy: rovnoměrné rozdělení 15 - 25s
@@ -276,11 +276,11 @@ Je vidět, že tyto dvě hodnoty nemají mezi sebou žádnou závislost, a tedy 
 \subsubsection{Cíl testu}
 Ověřit, zda se hypotéza 2 potvrdila, tedy zda je třeba snížit interval mezi reklamami, pokud jsou příspěvky delší.
 \subsubsection{Vstupy}
-Simulaci spustíme vícekrát s různými délkami příspevků, abychom zjistili, jak se mění interval opakování reklamy.
+Simulaci spustíme vícekrát s různými délkami příspěvků, abychom zjistili, jak se mění interval opakování reklamy.
 \begin{itemize}
     \item simualční čas: 28 dní
-    \item interval mezi přichazejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
-    \item počáteční interval mezi přichazejícími reklamami: 1000s
+    \item interval mezi přicházejícími příspěvky: exponenciální rozdělení se střední hodnotou 10s
+    \item počáteční interval mezi přicházejícími reklamami: 1000s
     \item doba pozornosti uživatele: normální rozdělení se střední hodnotou 120s a rozptýlením 5s
     \item délka příspěvku: rovnoměrné rozdělení od 5 - 10s do 85 - 90s se skokem 5s (17 iterací testu)
     \item délka reklamy: rovnoměrné rozdělení 15 - 25s
@@ -289,7 +289,7 @@ Simulaci spustíme vícekrát s různými délkami příspevků, abychom zjistil
 \subsubsection{Výstupy}
 
 Na grafu \ref{fig:post_length_vs_ad_interval} můžeme pozorovat, jak se mění interval opakování reklamy v závislosti na délce příspěvku.
-Je vidět, že tyto dvě hodnoty sou spolu závislé, a že interval se snižuje s delšími příspěvky.
+Je vidět, že tyto dvě hodnoty jsou spolu závislé, a že interval se snižuje s delšími příspěvky.
 hypotéza 2 je tedy potvrzena.
 \begin{figure}[h]
     \centering
@@ -306,8 +306,8 @@ Ověřit, zda se hypotéza 3 potvrdila, tedy zda je třeba zvýšit interval opa
 Simulaci spustíme vícekrát s různými počty nových příspěvků, abychom zjistili, jak se mění interval opakování reklamy.
 \begin{itemize}
     \item simualční čas: 7 dní
-    \item interval mezi přichazejícími příspěvky: postupně se zvyšující exponenciální hodnoty v intervalu od 10 do 240
-    \item počáteční interval mezi přichazejícími reklamami: 1000s
+    \item interval mezi přicházejícími příspěvky: postupně se zvyšující exponenciální hodnoty v intervalu od 10 do 240
+    \item počáteční interval mezi přicházejícími reklamami: 1000s
     \item doba pozornosti uživatele: normální rozdělení se střední hodnotou 40s a rozptýlením 5s
     \item délka příspěvku: rovnoměrné rozdělení 10 - 20s
     \item délka reklamy: rovnoměrné rozdělení 15 - 25s
@@ -319,7 +319,7 @@ Hypotéza 3 je tedy potvrzena.
 \begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{post_arrival_time_vs_ad_interval.png}
-    \caption{Závislost mezi intervalem přidámí příspevků a intervalem mezi reklamami}
+    \caption{Závislost mezi intervalem přidání příspěvků a intervalem mezi reklamami}
     \label{fig:post_arrival_time_vs_ad_interval}
 \end{figure}
 \newpage
@@ -327,7 +327,7 @@ Hypotéza 3 je tedy potvrzena.
 \section{Závěr}
 V tomto projektu jsme ověřili tři hypotézy, které se týkají závislosti intervalu opakování reklamy na době pozornosti uživatele, délce příspěvku a rychlosti přibývání nových příspěvků.
 
-Na zákaldě výsledků našich experimentů jsme zjistili, že interval opakování reklamy není závislý na době pozornosti uživatele, ale na délce příspěvku a rychlosti přibývání nových příspěvků.
+Na základě výsledků našich experimentů jsme zjistili, že interval opakování reklamy není závislý na době pozornosti uživatele, ale na délce příspěvku a rychlosti přibývání nových příspěvků.
 Při zvyšování délky příspěvku se interval zkracuje.
 Naopak se zvyšováním intervalu mezi novými příspěvky se interval reklamy prodlužuje.
 
