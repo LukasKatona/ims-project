@@ -12,11 +12,11 @@ double postArrivalTime = 10;
 double adArrivalTime = 1000;
 double attentionSpan = 40;
 
-double lengthOfPostLow = 5;
-double lengthOfPostHigh = 30;
+double lengthOfPostLow = 15;
+double lengthOfPostHigh = 20;
 
-double lengthOfAdLow = 10;
-double lengthOfAdHigh = 30;
+double lengthOfAdLow = 15;
+double lengthOfAdHigh = 25;
 
 bool autoregulate = true;
 
@@ -25,12 +25,8 @@ int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE;
 // Global objects
 Facility User("User");
 
-Histogram PostTable("Length of Posts", 5, 1, 25);
-Histogram AdTable("Length of Ads", 10, 1, 20);
-
 Histogram PostsPerDay("Posts seen per day", 0,1,numberOfDaysToSimulate);
 Histogram AdsPerDay("Ads seen per day", 0,1,numberOfDaysToSimulate);
-
 Histogram PostsPerHour("Posts seen per hour", 0,1,numberOfDaysToSimulate*24);
 
 Stat adArrivalTimeStat("Ad arrival time");
@@ -135,7 +131,6 @@ public:
     }
 
     Release(User);
-    PostTable(lengthOfPost);
     PostsPerDay(getDayFromTime(Time));
     PostsPerHour(getHourFromTime(Time));
   }
@@ -187,7 +182,6 @@ public:
     }
 
     Release(User);
-    AdTable(lengthOfAd);
     AdsPerDay(getDayFromTime(Time));
   }
 };
@@ -415,8 +409,6 @@ void makeTest(
   Print("Skipped ads: %d\n", numberOfSkippedAds);
 
   if (!multiTest) {
-    PostTable.Output();
-    AdTable.Output();
     PostsPerDay.Output();
     PostsPerHour.Output();
   }
@@ -435,8 +427,6 @@ void makeTest(
   numberOfSkippedAds = 0;
 
   // clear statistics
-  PostTable.Clear();
-  AdTable.Clear();
   PostsPerDay.Clear();
   PostsPerHour.Clear();
   AdsPerDay.Clear();
@@ -456,28 +446,28 @@ int main()
 
   //gneral parameters
   printf("test-with-general-parameters\n");
-  makeTest("test-with-general-parameters", 10, 13000, 40, 5, 30, 10, 30, false);
+  makeTest("test-with-general-parameters", 10, 1000, 40, 15, 20, 15, 25, false);
   printf("test-with-general-parameters-autoregulate\n");
-  makeTest("test-with-general-parameters-autoregulate", 10, 13000, 40, 5, 30, 10, 30, true);
+  makeTest("test-with-general-parameters-autoregulate", 10, 1000, 40, 15, 20, 15, 25, true);
 
   //post arrival time
   for (int i = 10; i <= 120; i += 10)
   {
     printf("test-with-post-arrival-time: %d s\n", i);
-    makeTest("test-with-post-arrival-time-" + to_string(i), i, 1000, 40, 5, 30, 10, 30, true, true);
+    makeTest("test-with-post-arrival-time-" + to_string(i), i, 1000, 40, 15, 20, 15, 25, true, true);
   }
 
   // user attention span
   for (int i = 10; i <= 120; i += 10)
   {
     printf("test-with-attention-span: %d s\n", i);
-    makeTest("test-with-attention-span-" + to_string(i), 10, 1000, i, 5, 30, 10, 30, true, true);
+    makeTest("test-with-attention-span-" + to_string(i), 10, 1000, i, 15, 20, 15, 25, true, true);
   }
 
   // length of post
-  for (int i = 30; i <= 120; i += 5)
+  for (int i = 10; i <= 120; i += 5)
   {
     printf("test-with-length-of-post: %d s\n", i);
-    makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 40, i-25, i, 10, 30, true, true);
+    makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 120, i-5, i, 15, 25, true, true); // we need to increase attention span to see the effect, otherwise the longer posts would be skipped
   }
 }
