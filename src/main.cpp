@@ -4,7 +4,7 @@
 
 using namespace std;
 
-bool debugPrints = true;
+bool debugPrints = false;
 const int DEFAULT_DAYS_TO_SIMULATE = 28;
 
 // Model inputs
@@ -32,12 +32,8 @@ Histogram PostsPerDay("Posts seen per day", 0,1,numberOfDaysToSimulate);
 Histogram AdsPerDay("Ads seen per day", 0,1,numberOfDaysToSimulate);
 
 Histogram PostsPerHour("Posts seen per hour", 0,1,numberOfDaysToSimulate*24);
-Histogram AdsPerHour("Ads seen per hour", 0,1,numberOfDaysToSimulate*24);
 
 Stat adArrivalTimeStat("Ad arrival time");
-
-Stat PostsPerScrolling("Number of posts viewed per scrolling phase");
-Stat AdsPerScrolling("Number of ads viewed per scrolling phase");
 
 // Variables
 int postCount = 0;
@@ -118,7 +114,7 @@ public:
 
     postCount++;
 
-    double currentAttentionSpan = Normal(attentionSpan, 5);
+    double currentAttentionSpan = abs(Normal(attentionSpan, 5));
     if (currentAttentionSpan < lengthOfPost)
     {
       Wait(currentAttentionSpan);
@@ -170,7 +166,7 @@ public:
       adFatigue = 0;
     }
 
-    double currentAttentionSpan = Normal(attentionSpan, 5);
+    double currentAttentionSpan = abs(Normal(attentionSpan, 5));
     if (currentAttentionSpan < lengthOfAd)
     {
       Wait(currentAttentionSpan);
@@ -193,7 +189,6 @@ public:
     Release(User);
     AdTable(lengthOfAd);
     AdsPerDay(getDayFromTime(Time));
-    AdsPerHour(getHourFromTime(Time));
   }
 };
 
@@ -362,6 +357,7 @@ void makeTest(
   double lengthOfAdLow,
   double lengthOfAdHigh,
   bool autoregulate,
+  bool multiTest = false,
   int numberOfDaysToSimulate = DEFAULT_DAYS_TO_SIMULATE) {
     
   // set output file
@@ -418,12 +414,13 @@ void makeTest(
   Print("Irrelevant ads: %d\n", numberOfIrrelevantAds);
   Print("Skipped ads: %d\n", numberOfSkippedAds);
 
-  PostTable.Output();
-  AdTable.Output();
-  PostsPerDay.Output();
-  PostsPerHour.Output();
+  if (!multiTest) {
+    PostTable.Output();
+    AdTable.Output();
+    PostsPerDay.Output();
+    PostsPerHour.Output();
+  }
   AdsPerDay.Output();
-  AdsPerHour.Output();
   adArrivalTimeStat.Output();
 
   // clear variables
@@ -443,7 +440,6 @@ void makeTest(
   PostsPerDay.Clear();
   PostsPerHour.Clear();
   AdsPerDay.Clear();
-  AdsPerHour.Clear();
   adArrivalTimeStat.Clear();
 }
 
@@ -458,13 +454,30 @@ int main()
     }
   }
 
-  printf("test\n");
-  makeTest("test", 10, 1000, 40, 5, 30, 10, 30, false);
-  printf("test-autoregulate\n");
-  makeTest("test-autoregulate", 10, 1000, 40, 5, 30, 10, 30, true);
+  //gneral parameters
+  printf("test-with-general-parameters\n");
+  makeTest("test-with-general-parameters", 10, 13000, 40, 5, 30, 10, 30, false);
+  printf("test-with-general-parameters-autoregulate\n");
+  makeTest("test-with-general-parameters-autoregulate", 10, 13000, 40, 5, 30, 10, 30, true);
 
-  // printf("test-small-attention-span\n");
-  // makeTest("test-small-attention-span", 10, 1000, 10, 5, 30, 10, 30, false);
-  // printf("test-small-attention-span-autoregulate\n");
-  // makeTest("test-small-attention-span-autoregulate", 10, 1000, 10, 5, 30, 10, 30, true);
+  //post arrival time
+  for (int i = 10; i <= 120; i += 10)
+  {
+    printf("test-with-post-arrival-time: %d s\n", i);
+    makeTest("test-with-post-arrival-time-" + to_string(i), i, 1000, 40, 5, 30, 10, 30, true, true);
+  }
+
+  // user attention span
+  for (int i = 10; i <= 120; i += 10)
+  {
+    printf("test-with-attention-span: %d s\n", i);
+    makeTest("test-with-attention-span-" + to_string(i), 10, 1000, i, 5, 30, 10, 30, true, true);
+  }
+
+  // length of post
+  for (int i = 30; i <= 120; i += 5)
+  {
+    printf("test-with-length-of-post: %d s\n", i);
+    makeTest("test-with-length-of-post-" + to_string(i), 10, 1000, 40, i-25, i, 10, 30, true, true);
+  }
 }

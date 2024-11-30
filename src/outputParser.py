@@ -66,9 +66,9 @@ def plot_histogram(bins, frequencies, output_path, title, xlabel, ylabel):
 
     
 
-    if "adds seen per day" in title.lower():
-        plt.axhline(y=5, color='red', linestyle='--', label='Max 5 Adds per Day')
-        legend_labels.append('Max 5 Adds per Day')
+    if "ads seen per day" in title.lower():
+        plt.axhline(y=5, color='red', linestyle='--', label='Max 5 Ads per Day')
+        legend_labels.append('Max 5 Ads per Day')
         plt.axhline(y=median_value, color='green', linestyle='--', label=f'Median: {median_value:.2f}')
         legend_labels.append(f'Median: {median_value:.2f}')
     elif "length" not in title.lower():
@@ -135,14 +135,14 @@ def extract_and_plot_histograms(file_path):
                     if "more" in title.lower():
                         yLabel = "Number of Occurrences"
                     else:
-                        if "adds" in title.lower():
-                            yLabel = "Number of Adds"
+                        if "ads" in title.lower():
+                            yLabel = "Number of Ads"
                         else:
                             yLabel = "Number of Posts"
                 if "length" in title.lower():
                     xLabel = "Length (seconds)"
-                    if "adds" in title.lower():
-                        yLabel = "Number of Adds"
+                    if "ads" in title.lower():
+                        yLabel = "Number of Ads"
                     else:
                         yLabel = "Number of Posts"
                 
